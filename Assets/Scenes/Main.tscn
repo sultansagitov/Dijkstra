@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://crciqmvfw54d8"]
+
+[ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_4ixsy")
+
+[node name="Edges" type="Node2D" parent="."]
+
+[node name="Vertices" type="Node2D" parent="."]

@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://2gbrj0n670p3"]
+
+[ext_resource type="Script" path="res://Assets/Prefabs/Edge.cs" id="1_xnfne"]
+
+[node name="Edge" type="Node2D" node_paths=PackedStringArray("linecenter", "len")]
+script = ExtResource("1_xnfne")
+linecenter = NodePath("linecenter")
+len = NodePath("len")
+
+[node name="linecenter" type="Node2D" parent="."]
+scale = Vector2(100, 1)
+
+[node name="line" type="ColorRect" parent="linecenter"]
+offset_left = -1.0
+offset_top = -2.0
+offset_right = 1.0
+offset_bottom = 2.0
+color = Color(0.0509804, 0.0588235, 0.0980392, 1)
+
+[node name="len_bg" type="ColorRect" parent="."]
+offset_left = -40.0
+offset_top = -8.0
+offset_right = 40.0
+offset_bottom = 8.0
+color = Color(0.815686, 0.847059, 0.854902, 0.666667)
+
+[node name="len" type="Label" parent="."]
+offset_left = -48.0
+offset_top = -24.0
+offset_right = 48.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "1000.000"
+horizontal_alignment = 1
+vertical_alignment = 1
