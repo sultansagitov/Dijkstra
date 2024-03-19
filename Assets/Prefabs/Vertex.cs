@@ -14,6 +14,13 @@ public partial class Vertex : Node2D
 	public void Select()
 	{
 		GetNode<Sprite2D>("Select").Visible = true;
+		GetNode<Sprite2D>("Select").SelfModulate = new Color(0.1f, 0.09f, 0.1f);
+	}
+
+	public void SelectAsSecond()
+	{
+		GetNode<Sprite2D>("Select").Visible = true;
+		GetNode<Sprite2D>("Select").SelfModulate = new Color(0.4f, 0.2f, 0.7f);
 	}
 
 	public void Deselect()

@@ -6,14 +6,20 @@ public partial class Main : Node2D
 {
 	public Node2D vertices;
 	public Node2D edges;
-	public List<Vertex> verticesLst = new();
+	private List<Vertex> verticesLst = new();
 
 	public Vertex selected = null;
+	private float holdingFor = 0f;
+	private bool isHolding = false;
+	public Vertex secondSelected = null;
+
+	private Vector2 prevmousepos;
 
 	public override void _Ready()
 	{
 		vertices = GetNode<Node2D>("Vertices");
 		edges = GetNode<Node2D>("Edges");
+		prevmousepos = GetGlobalMousePosition();
 	}
 
 	public override void _Process(double delta)
@@ -22,33 +28,62 @@ public partial class Main : Node2D
 		double dist = 50.0;
 		Vertex nearest = null;
 
-		foreach (var ver in verticesLst)
+		foreach (var vert in verticesLst)
 		{
-			double d = (mousepos - ver.Position).Length();
+			double d = (mousepos - vert.Position).Length();
 
 			if (d < dist)
 			{
 				dist = d;
-				nearest = ver;
+				nearest = vert;
 			}
 		}
 
-        if (Input.IsActionPressed("save_selected"))
-        {
-        }
-        else
-        {
-            if (nearest != null)
-            {
-				// Select other Vertex
-                if (selected != nearest)
-                {
-					MoveSelection(nearest);
-                }
-            }
+		if (secondSelected != null && (mousepos - secondSelected.Position).Length() > 50.0)
+		{
+			secondSelected.Deselect();
+			secondSelected = null;
+		}
 
-            if (selected != null)
-            {
+		if (Input.IsActionPressed("save_selected") || isHolding)
+		{
+			if (Input.IsActionPressed("connection"))
+			{
+				double dist2 = 50f;
+
+				foreach (var vert in verticesLst)
+				{
+					if (vert != selected)
+					{
+						double d = (mousepos - vert.Position).Length();
+
+						if (d < dist2)
+						{
+							dist2 = d;
+							secondSelected = vert;
+						}
+					}
+				}
+
+				if (secondSelected != null)
+				{
+					secondSelected.SelectAsSecond();
+				}
+			}
+		}
+		else
+		{
+			if (nearest != null)
+			{
+				// Select other Vertex
+				if (selected != nearest)
+				{
+					MoveSelection(nearest);
+				}
+			}
+
+			if (selected != null)
+			{
 				// Deselect when mouse too far
 				if ((mousepos - selected.Position).Length() > 50.0)
 				{
@@ -56,33 +91,57 @@ public partial class Main : Node2D
 					selected = null;
 				}
 			}
-        }
-
-
-		if (Input.IsActionJustPressed("leftmouse"))
-		{
-			Vertex vert;
-
-			if (dist > 40)
-			{
-				// Create new vertex
-				vert = GD.Load<PackedScene>("res://Assets/Prefabs/Vertex.tscn").Instantiate<Vertex>();
-				vert.Position = mousepos;
-				vertices.AddChild(vert);
-				verticesLst.Add(vert);
-			}
-			else
-			{
-				nearest.Position = (nearest.Position + mousepos) / 2;
-				vert = nearest;
-			}
-
-			if (selected != null)
-				CreateEdge(vert, selected);
-				
-			MoveSelection(vert);
 		}
 
+		if (Input.IsActionJustReleased("leftmouse"))
+		{
+			holdingFor = 0f;
+			isHolding = false;
+		}
+
+		if (Input.IsActionPressed("leftmouse"))
+		{
+			holdingFor += (float)delta;
+
+			if (Input.IsActionJustPressed("leftmouse"))
+			{
+				prevmousepos = GetGlobalMousePosition();
+
+				// Create new vertex
+				if (dist > 40)
+				{
+					Vertex vert = GD.Load<PackedScene>("res://Assets/Prefabs/Vertex.tscn").Instantiate<Vertex>();
+					vert.Position = mousepos;
+					vertices.AddChild(vert);
+					verticesLst.Add(vert);
+
+					if (selected != null)
+						CreateEdge(vert, selected);
+
+					MoveSelection(vert);
+				}
+
+				if (secondSelected != null)
+				{
+					CreateEdge(selected, secondSelected);
+				}
+			}
+			else if (selected != null)
+			{
+				isHolding = true;
+
+				Vector2 mouseDelta;
+
+				if (prevmousepos != null)
+					mouseDelta = mousepos - prevmousepos;
+				else
+					mouseDelta = new Vector2();
+
+				prevmousepos = mousepos;
+
+				selected.Position += mouseDelta;
+			}
+		}
 
 		if (Input.IsActionJustPressed("rightmouse") && selected != null)
 		{
@@ -92,7 +151,8 @@ public partial class Main : Node2D
 		}
 	}
 
-	public void MoveSelection(Vertex newVert) {
+	public void MoveSelection(Vertex newVert)
+	{
 		selected?.Deselect();
 		newVert.Select();
 		selected = newVert;

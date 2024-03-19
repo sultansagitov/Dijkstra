@@ -7,7 +7,6 @@
 script = ExtResource("1_bl2nv")
 
 [node name="Select" type="Sprite2D" parent="."]
-visible = false
 self_modulate = Color(0.101961, 0.0941176, 0.105882, 1)
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("1_xe55k")

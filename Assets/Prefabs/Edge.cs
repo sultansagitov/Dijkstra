@@ -13,7 +13,7 @@ public partial class Edge : Node2D
 	
 	public override void _Ready()
 	{
-		linecenter = GetNode<Node2D>("linecenter");
+		linecenter = GetNode<Node2D>("linecenter");	
 		len = GetNode<Label>("len");
 	}
 
@@ -26,7 +26,7 @@ public partial class Edge : Node2D
 		Position = (a.Position + b.Position) / 2;
 		linecenter.Scale = new Vector2(length / 2, 1);
 		linecenter.RotationDegrees = Mathf.Atan(delta.Y / delta.X) * 180 / Mathf.Pi;
-		len.Text = length.ToString();
+		len.Text = $"{length:F2}";
 
 		if (a == b) {
 			GetParent().RemoveChild(this);
