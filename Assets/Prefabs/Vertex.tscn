@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://csustt60bc43o"]
+
+[ext_resource type="Script" path="res://Assets/Prefabs/Vertex.cs" id="1_bl2nv"]
+[ext_resource type="Texture2D" uid="uid://biyjv5yg2msyq" path="res://Assets/Sprites/Circle.png" id="1_xe55k"]
+
+[node name="Vertex" type="Node2D"]
+script = ExtResource("1_bl2nv")
+
+[node name="Select" type="Sprite2D" parent="."]
+visible = false
+self_modulate = Color(0.101961, 0.0941176, 0.105882, 1)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("1_xe55k")
+
+[node name="c" type="Sprite2D" parent="Select"]
+self_modulate = Color(0.815686, 0.847059, 0.854902, 1)
+scale = Vector2(0.83, 0.83)
+texture = ExtResource("1_xe55k")
+
+[node name="Circle" type="Sprite2D" parent="."]
+self_modulate = Color(0.101961, 0.0941176, 0.105882, 1)
+scale = Vector2(0.063, 0.063)
+texture = ExtResource("1_xe55k")
