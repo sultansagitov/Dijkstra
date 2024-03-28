@@ -3,13 +3,10 @@ using System;
 
 public partial class Vertex : Node2D
 {
-	public override void _Ready()
-	{
-	}
+	public char letter = ' ';
+	public override void _Ready() { }
 
-	public override void _Process(double delta)
-	{
-	}
+	public override void _Process(double delta) { }
 
 	public void Select()
 	{
@@ -23,8 +20,18 @@ public partial class Vertex : Node2D
 		GetNode<Sprite2D>("Select").SelfModulate = new Color(0.4f, 0.2f, 0.7f);
 	}
 
-	public void Deselect()
+	public void Deselect() => GetNode<Sprite2D>("Select").Visible = false;
+
+	public void SetLetter(char letter)
 	{
-		GetNode<Sprite2D>("Select").Visible = false;
+		this.letter = letter;
+		GetNode<Label>("letter").Text = letter.ToString();
 	}
+
+	public void ClearLetter()
+	{
+		letter = ' ';
+		GetNode<Label>("letter").Text = "";
+	}
+
 }

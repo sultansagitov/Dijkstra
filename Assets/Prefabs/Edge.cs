@@ -3,36 +3,32 @@ using System;
 
 public partial class Edge : Node2D
 {
-	[Export]
-	public Node2D linecenter;
-	[Export]
-	public Label len;
+	[Export] public Node2D linecenter;
+	[Export] public Label len;
+
+	public bool removeInNextFrame = false;
+	public bool createVertexInNextFrame = false;
 
 	public Vertex a;
 	public Vertex b;
-	
+
+	public bool HasVertex(Vertex x) => a == x || b == x;
+	public bool HasVertex(Vertex a, Vertex b) => this.a == a && this.b == b || this.b == a && this.a == b;
+
 	public override void _Ready()
 	{
-		linecenter = GetNode<Node2D>("linecenter");	
-		len = GetNode<Label>("len");
 	}
 
-	public override void _Process(double _delta)
+	public override void _Process(double delta)
 	{
+	}
 
-		Vector2 delta = a.Position - b.Position;
-		float length = delta.Length();
-
-		Position = (a.Position + b.Position) / 2;
-		linecenter.Scale = new Vector2(length / 2, 1);
-		linecenter.RotationDegrees = Mathf.Atan(delta.Y / delta.X) * 180 / Mathf.Pi;
-		len.Text = $"{length:F2}";
-
-		if (a == b) {
-			GetParent().RemoveChild(this);
+	public void Gui_Input(InputEvent ev)
+	{
+		if (ev is InputEventMouseButton @e)
+		{
+			createVertexInNextFrame |=  @e.ButtonIndex == MouseButton.Left && @e.Pressed;
+			removeInNextFrame |= @e.ButtonIndex == MouseButton.Right && @e.Pressed;
 		}
-
-		if (!(a.IsInsideTree() && b.IsInsideTree()))
-			GetParent().RemoveChild(this);
 	}
 }

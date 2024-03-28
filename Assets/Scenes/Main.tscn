@@ -4,7 +4,19 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_4ixsy")
+vertices = NodePath("Vertices")
+edges = NodePath("Edges")
 
 [node name="Edges" type="Node2D" parent="."]
 
 [node name="Vertices" type="Node2D" parent="."]
+
+[node name="Label" type="Label" parent="."]
+offset_left = -152.0
+offset_top = -168.0
+offset_right = -26.0
+offset_bottom = -93.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "m: 60; 80
+s: 50; 50
+b: 50; 50"

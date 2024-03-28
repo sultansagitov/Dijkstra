@@ -1,12 +1,14 @@
-using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Godot;
 
 public partial class Main : Node2D
 {
-	public Node2D vertices;
-	public Node2D edges;
-	private List<Vertex> verticesLst = new();
+	[Export] public Node2D vertices;
+	[Export] public Node2D edges;
+	private List<Vertex> verticesList = new();
+	private List<Edge> edgesList = new();
 
 	public Vertex selected = null;
 	private float holdingFor = 0f;
@@ -27,8 +29,9 @@ public partial class Main : Node2D
 		var mousepos = GetGlobalMousePosition();
 		double dist = 50.0;
 		Vertex nearest = null;
+		bool dontCreateExtra = false;
 
-		foreach (var vert in verticesLst)
+		foreach (var vert in verticesList)
 		{
 			double d = (mousepos - vert.Position).Length();
 
@@ -45,13 +48,54 @@ public partial class Main : Node2D
 			secondSelected = null;
 		}
 
+		edgesList = edgesList.Where(edge =>
+		{
+			if (edge.removeInNextFrame)
+				edges.RemoveChild(edge);
+			return !edge.removeInNextFrame;
+		}).ToList();
+
+		List<Edge> toAddEdges = new();
+
+		foreach (var edge in edgesList)
+		{
+			if (edge.createVertexInNextFrame)
+			{
+				edge.createVertexInNextFrame = false;
+				dontCreateExtra = true; // i love kostyli
+
+				Vertex vert = GD.Load<PackedScene>("res://Assets/Prefabs/Vertex.tscn").Instantiate<Vertex>();
+				vert.Position = mousepos;
+				vertices.AddChild(vert);
+				verticesList.Add(vert);
+
+				toAddEdges.Add(CreateEdge(edge.b, vert, false));
+				edge.b = vert;
+
+				MoveSelection(vert);
+			}
+		}
+
+		edgesList.AddRange(toAddEdges);
+
+		foreach (var edge in edgesList)
+		{
+			Vector2 diff = edge.a.Position - edge.b.Position;
+			float length = diff.Length();
+
+			edge.Position = (edge.a.Position + edge.b.Position) / 2;
+			edge.linecenter.Scale = new Vector2(length / 2, 1);
+			edge.linecenter.RotationDegrees = Mathf.Atan(diff.Y / diff.X) * 180 / Mathf.Pi;
+			edge.len.Text = $"{length:F0}";
+		}
+
 		if (Input.IsActionPressed("save_selected") || isHolding)
 		{
 			if (Input.IsActionPressed("connection"))
 			{
 				double dist2 = 50f;
 
-				foreach (var vert in verticesLst)
+				foreach (var vert in verticesList)
 				{
 					if (vert != selected)
 					{
@@ -65,10 +109,7 @@ public partial class Main : Node2D
 					}
 				}
 
-				if (secondSelected != null)
-				{
-					secondSelected.SelectAsSecond();
-				}
+				secondSelected?.SelectAsSecond();
 			}
 		}
 		else
@@ -108,12 +149,12 @@ public partial class Main : Node2D
 				prevmousepos = GetGlobalMousePosition();
 
 				// Create new vertex
-				if (dist > 40)
+				if (!dontCreateExtra && dist > 40)
 				{
 					Vertex vert = GD.Load<PackedScene>("res://Assets/Prefabs/Vertex.tscn").Instantiate<Vertex>();
 					vert.Position = mousepos;
 					vertices.AddChild(vert);
-					verticesLst.Add(vert);
+					verticesList.Add(vert);
 
 					if (selected != null)
 						CreateEdge(vert, selected);
@@ -130,12 +171,7 @@ public partial class Main : Node2D
 			{
 				isHolding = true;
 
-				Vector2 mouseDelta;
-
-				if (prevmousepos != null)
-					mouseDelta = mousepos - prevmousepos;
-				else
-					mouseDelta = new Vector2();
+				Vector2 mouseDelta = mousepos - prevmousepos;
 
 				prevmousepos = mousepos;
 
@@ -146,9 +182,25 @@ public partial class Main : Node2D
 		if (Input.IsActionJustPressed("rightmouse") && selected != null)
 		{
 			vertices.RemoveChild(selected);
-			verticesLst.Remove(selected);
+			verticesList.Remove(selected);
+
+			edgesList = edgesList.Where(edge =>
+			{
+				if (edge.HasVertex(selected))
+					edges.RemoveChild(edge);
+				return !edge.HasVertex(selected);
+			}).ToList();
 			selected = null;
 		}
+
+		string t = "";
+		t += $"m: {mousepos}";
+		if (selected != null)
+			t += $"\ns: {selected.Position}";
+		if (secondSelected != null)
+			t += $"\nb: {secondSelected.Position}";
+
+		GetNode<Label>("Label").Text = t;
 	}
 
 	public void MoveSelection(Vertex newVert)
@@ -158,19 +210,32 @@ public partial class Main : Node2D
 		selected = newVert;
 	}
 
-	public void CreateEdge(Vertex a, Vertex b)
+	public Edge CreateEdge(Vertex a, Vertex b) => CreateEdge(a, b, true);
+	public Edge CreateEdge(Vertex a, Vertex b, bool changeList)
 	{
-		Vector2 delta = a.Position - b.Position;
-		float length = delta.Length();
+		if (verticesList.Contains(a) && verticesList.Contains(b) && a != b)
+		{
+			Vector2 delta = a.Position - b.Position;
+			float length = delta.Length();
 
-		var edge = GD.Load<PackedScene>("res://Assets/Prefabs/Edge.tscn").Instantiate<Edge>();
-		edge.Position = (a.Position + b.Position) / 2;
-		edge.linecenter.Scale = new Vector2(length / 2, 1);
-		edge.linecenter.RotationDegrees = Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
-		edge.len.Text = length.ToString();
-		edge.a = a;
-		edge.b = b;
+			if (!edgesList.Any(edge => edge.HasVertex(a, b)))
+			{
+				Edge edge = GD.Load<PackedScene>("res://Assets/Prefabs/Edge.tscn").Instantiate<Edge>();
+				edge.Position = (a.Position + b.Position) / 2;
+				edge.linecenter.Scale = new(length / 2, 1);
+				edge.linecenter.RotationDegrees = Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
+				edge.len.Text = length.ToString();
+				edge.a = a;
+				edge.b = b;
 
-		edges.AddChild(edge);
+				edges.AddChild(edge);
+				if (changeList)
+					edgesList.Add(edge);
+
+				return edge;
+			}
+		}
+
+		return null;
 	}
 }
