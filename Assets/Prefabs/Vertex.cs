@@ -3,28 +3,35 @@ using System;
 
 public partial class Vertex : Node2D
 {
-	public override void _Ready()
-	{
-	}
+    private string mark = "";
 
-	public override void _Process(double delta)
-	{
-	}
+    public string Mark
+    {
+        get => mark;
+        set
+        {
+            GetNode<Label>("mark").Text = value;
+            mark = value;
+        }
+    }
+
+    public override void _Ready() { }
+	public override void _Process(double delta) { }
 
 	public void Select()
 	{
 		GetNode<Sprite2D>("Select").Visible = true;
-		GetNode<Sprite2D>("Select").SelfModulate = new Color(0.1f, 0.09f, 0.1f);
 	}
 
-	public void SelectAsSecond()
+	public void Deselect() => GetNode<Sprite2D>("Select").Visible = false;
+
+	public void SetMark(string mark)
 	{
-		GetNode<Sprite2D>("Select").Visible = true;
-		GetNode<Sprite2D>("Select").SelfModulate = new Color(0.4f, 0.2f, 0.7f);
+		Mark = mark;
 	}
 
-	public void Deselect()
+	public void ClearMark()
 	{
-		GetNode<Sprite2D>("Select").Visible = false;
+		Mark = "";
 	}
 }
