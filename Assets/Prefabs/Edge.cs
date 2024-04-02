@@ -31,6 +31,7 @@ public partial class Edge : Node2D
 	}
 
 	public override void _Process(double delta)
+	public override void _Process(double delta)
 	{
 	}
 

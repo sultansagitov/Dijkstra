@@ -34,4 +34,5 @@ public partial class Vertex : Node2D
 	{
 		Mark = "";
 	}
+
 }
