@@ -3,7 +3,7 @@ using System;
 
 public partial class Vertex : Node2D
 {
-    private string mark = "A";
+    private string mark = "\0";
 
     public string Mark
     {

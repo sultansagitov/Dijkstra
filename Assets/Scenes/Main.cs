@@ -270,15 +270,23 @@ public partial class Main : Node2D
 
 	//==== Most used medhods ====//
 
+	public static char FindMissingLetter(string letters)
+	{
+		if (!letters.Contains('A'))
+		{
+			return 'A';
+		}
 
-    public static char FindMissingLetter(string letters) {
-        for (char expected = 'A'; expected <= 'Z'; expected++) {
-            if (!letters.Contains(expected.ToString())) {
-                return expected;
-            }
-        }
-        return '\0';
-    }
+		for (char expected = 'B'; expected <= 'Z'; expected++)
+		{
+			if (!letters.Contains(expected.ToString()))
+			{
+				return expected;
+			}
+		}
+		return '\0'; // Если пропущенных букв нет
+	}
+
 
 	public void UpdateSelection()
 	{
