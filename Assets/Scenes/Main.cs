@@ -390,12 +390,6 @@ public partial class Main : Node2D
 	public void Helpbtn_Pressed()
 	{
 		helptext.Visible ^= true;
-		string ch = "";
-		foreach (var v in verticesList)
-		{
-			ch += v.Mark[0];
-		}
-		GD.Print(ch);
 	}
 
 	public void Quitbtn_Pressed()
