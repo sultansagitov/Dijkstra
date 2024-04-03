@@ -6,8 +6,8 @@ public partial class Edge : Node2D
 	[Export] public Node2D linecenter;
 	[Export] public Label len;
 
-	public bool removeInNextFrame = false; // i love kostyli
-	public bool createVertexInNextFrame = false; // i love kostyli
+	public bool removeInNextFrame = false;
+	public bool createVertexInNextFrame = false;
 
 	public Vertex a;
 	public Vertex b;

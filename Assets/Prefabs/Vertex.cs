@@ -3,7 +3,7 @@ using System;
 
 public partial class Vertex : Node2D
 {
-    private string mark = "";
+    private string mark = "A";
 
     public string Mark
     {
@@ -25,10 +25,6 @@ public partial class Vertex : Node2D
 
 	public void Deselect() => GetNode<Sprite2D>("Select").Visible = false;
 
-	public void SetMark(string mark)
-	{
-		Mark = mark;
-	}
 
 	public void ClearMark()
 	{

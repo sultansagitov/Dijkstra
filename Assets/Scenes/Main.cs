@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using System.Linq;
-using Godot;
 
 public partial class Main : Node2D
 {
 	[Export] public Node2D vertices;
 	[Export] public Node2D edges;
+
 	[Export] public Node2D menu;
 	[Export] public Node2D helptext;
 
@@ -84,13 +83,10 @@ public partial class Main : Node2D
 
 			if (n == null)
 			{
-				nearest?.Deselect();
 				nearest = null;
 			}
 			else if (nearest != n)
 			{
-				nearest?.Deselect();
-				n.Select();
 				nearest = n;
 			}
 		}
@@ -113,15 +109,12 @@ public partial class Main : Node2D
 				if (edge.createVertexInNextFrame)
 				{
 					edge.createVertexInNextFrame = false;
-					dontCreateExtra = true; // i love kostyli
+					dontCreateExtra = true;
 
 					Vertex vert = CreateVertex(mousepos);
 
 					toAddEdges.Add(CreateEdge(edge.b, vert, false));
 					edge.b = vert;
-
-					nearest?.Deselect();
-					vert.Select();
 					nearest = vert;
 				}
 			}
@@ -129,11 +122,20 @@ public partial class Main : Node2D
 			edgesList.AddRange(toAddEdges);
 		}
 
-		// Deselect when mouse too far
+		//==== Deselect when mouse too far ====//
 		if (allowEditGraph && !isHolding && nearest != null && (mousepos - nearest.Position).Length() > 50.0)
 		{
-			nearest.Deselect();
 			nearest = null;
+		}
+
+
+		UpdateSelection();
+
+
+		//==== Set keyboard letter ====//
+		if (allowEditGraph && nearest != null && pressedKey != null)
+		{
+			nearest.Mark = pressedKey.ToString();
 		}
 
 
@@ -156,6 +158,7 @@ public partial class Main : Node2D
 
 			if (isHolding)
 			{
+				if (holded == null) GD.Print("qwerty");
 				holded.Position += mousepos - _prevmousepos;
 				_prevmousepos = mousepos;
 			}
@@ -164,7 +167,10 @@ public partial class Main : Node2D
 		}
 
 		if (Input.IsActionJustReleased("leftmouse") || !allowEditGraph)
+		{
 			isHolding = false;
+			holded = null;
+		}
 
 
 		// Middle button
@@ -172,15 +178,22 @@ public partial class Main : Node2D
 		{
 			if (Input.IsActionJustPressed("middlemouse"))
 			{
-				startConnect = nearest;
-				RemoveVertex(tempMouseVertex);
-				tempMouseVertex = CreateVertex(mousepos, startConnect);
-				tempMouseVertex.Visible = false;
+				if (nearest != null)
+				{
+					startConnect = nearest;
+					RemoveVertex(tempMouseVertex);
+					tempMouseVertex = CreateVertex(mousepos, startConnect);
+					tempMouseVertex.Visible = false;
+				}
+				else
+				{
+					holded = CreateVertex(mousepos);
+				}
 			}
 
 			if (tempMouseVertex != null)
 			{
-				if (nearest != null)
+				if (startConnect != nearest && nearest != null)
 				{
 					tempMouseVertex.Position = nearest.Position;
 					possiblyConnect = true;
@@ -200,7 +213,7 @@ public partial class Main : Node2D
 			if (possiblyConnect)
 			{
 				RemoveVertex(tempMouseVertex);
-				if (startConnect != null)
+				if (startConnect != null && nearest != null)
 					CreateEdge(startConnect, nearest);
 			}
 			else if (tempMouseVertex != null)
@@ -221,18 +234,19 @@ public partial class Main : Node2D
 
 
 		//==== Debuging ====//
-		string t = "";
-		t += $"m: {mousepos} \n";
-		if (nearest != null)
-			t += $"s: {nearest.Position} \n";
-		if (startConnect != null)
-			t += $"n: {startConnect.Position} \n";
 
-		if (dontCreateExtra) t += "dontCreateExtra \n";
-		if (allowEditGraph) t += "allowEditGraph \n";
-		if (possiblyConnect) t += "possiblyConnect \n";
-		if (isHolding) t += "isHolding \n";
-		if (pressedKey != null) t += pressedKey + " \n";
+		string t = "";
+		// t += $"m: {mousepos} \n";
+		// if (nearest != null)
+		// 	t += $"s: {nearest.Position} \n";
+		// if (startConnect != null)
+		// 	t += $"n: {startConnect.Position} \n";
+
+		// if (dontCreateExtra) t += "dontCreateExtra \n";
+		// if (allowEditGraph) t += "allowEditGraph \n";
+		// if (possiblyConnect) t += "possiblyConnect \n";
+		// if (isHolding) t += "isHolding \n";
+		// if (pressedKey != null) t += pressedKey + " \n";
 
 		GetNode<Label>("Label").Text = t;
 
@@ -255,6 +269,28 @@ public partial class Main : Node2D
 
 
 	//==== Most used medhods ====//
+
+
+    public static char FindMissingLetter(string letters) {
+        for (char expected = 'A'; expected <= 'Z'; expected++) {
+            if (!letters.Contains(expected.ToString())) {
+                return expected;
+            }
+        }
+        return '\0';
+    }
+
+	public void UpdateSelection()
+	{
+		foreach (var vert in verticesList)
+		{
+			if (vert == nearest || vert == startConnect)
+				vert.Select();
+			else
+				vert.Deselect();
+		}
+	}
+
 	public void UpdateEdges()
 	{
 		foreach (var edge in edgesList)
@@ -268,18 +304,28 @@ public partial class Main : Node2D
 			edge.Size = (int)length;
 		}
 	}
+
+	public Vertex CreateVertex(Vector2 pos, Vertex other)
+	{
+		Vertex vert = CreateVertex(pos);
+		CreateEdge(vert, other);
+		return vert;
+	}
 	public Vertex CreateVertex(Vector2 pos)
 	{
 		Vertex vert = GD.Load<PackedScene>("res://Assets/Prefabs/Vertex.tscn").Instantiate<Vertex>();
 		vert.Position = pos;
 		vertices.AddChild(vert);
 		verticesList.Add(vert);
-		return vert;
-	}
-	public Vertex CreateVertex(Vector2 pos, Vertex other)
-	{
-		Vertex vert = CreateVertex(pos);
-		CreateEdge(vert, other);
+
+		string ch = "";
+		foreach (var v in verticesList)
+		{
+			ch += v.Mark[0];
+		}
+
+		vert.Mark = FindMissingLetter(ch).ToString();
+
 		return vert;
 	}
 
@@ -304,7 +350,7 @@ public partial class Main : Node2D
 	{
 		if (a == b)
 		{
-			GD.PushWarning("WARNING: Unable to create edge between same vertices");
+			GD.PushWarning("Unable to create edge between same vertices");
 			return null;
 		}
 
@@ -344,6 +390,12 @@ public partial class Main : Node2D
 	public void Helpbtn_Pressed()
 	{
 		helptext.Visible ^= true;
+		string ch = "";
+		foreach (var v in verticesList)
+		{
+			ch += v.Mark[0];
+		}
+		GD.Print(ch);
 	}
 
 	public void Quitbtn_Pressed()
