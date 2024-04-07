@@ -2,10 +2,12 @@
 
 [ext_resource type="Script" path="res://Assets/Prefabs/Edge.cs" id="1_xnfne"]
 
-[node name="Edge" type="Node2D" node_paths=PackedStringArray("linecenter", "len")]
+[node name="Edge" type="Node2D" node_paths=PackedStringArray("linecenter", "len", "line", "len_bg")]
 script = ExtResource("1_xnfne")
 linecenter = NodePath("linecenter")
 len = NodePath("len")
+line = NodePath("linecenter/line")
+len_bg = NodePath("len_bg")
 
 [node name="linecenter" type="Node2D" parent="."]
 scale = Vector2(100, 1)

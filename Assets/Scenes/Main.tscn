@@ -2,12 +2,15 @@
 
 [ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "startenderr_node", "shortpath")]
 script = ExtResource("1_4ixsy")
 vertices = NodePath("Vertices")
 edges = NodePath("Edges")
 menu = NodePath("menu")
 helptext = NodePath("helptext")
+makenew = NodePath("makenew_box")
+startenderr_node = NodePath("startenderr_box")
+shortpath = NodePath("menu/shortpath")
 
 [node name="Edges" type="Node2D" parent="."]
 
@@ -15,9 +18,9 @@ helptext = NodePath("helptext")
 
 [node name="Label" type="Label" parent="."]
 offset_left = 16.0
-offset_top = 352.0
+offset_top = 336.0
 offset_right = 142.0
-offset_bottom = 427.0
+offset_bottom = 411.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "m: 60; 80
 s: 50; 50
@@ -28,23 +31,54 @@ b: 50; 50"
 [node name="bg" type="ColorRect" parent="menu"]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 240.0
-offset_bottom = 336.0
-color = Color(0.258824, 0.301961, 0.423529, 0.560784)
+offset_right = 336.0
+offset_bottom = 320.0
+color = Color(0.258824, 0.301961, 0.423529, 0.301961)
 
 [node name="helpbtn" type="Button" parent="menu"]
 offset_left = 32.0
 offset_top = 32.0
-offset_right = 224.0
+offset_right = 320.0
 offset_bottom = 64.0
 theme_override_font_sizes/font_size = 12
-text = "Помощь"
+text = "Помощь (h)"
+
+[node name="findpathbtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 80.0
+offset_right = 320.0
+offset_bottom = 112.0
+theme_override_font_sizes/font_size = 12
+text = "Найти кратчайший путь (Пробел)"
+
+[node name="removeallbtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 128.0
+offset_right = 320.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 12
+text = "Очистить  граф (r)"
+
+[node name="showsmallcheck" type="CheckBox" parent="menu"]
+offset_left = 32.0
+offset_top = 176.0
+offset_right = 320.0
+offset_bottom = 200.0
+
+[node name="Label" type="Label" parent="menu/showsmallcheck"]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 288.0
+offset_bottom = 24.0
+theme_override_font_sizes/font_size = 12
+text = "Показывать длину при малых размерах"
+vertical_alignment = 1
 
 [node name="shortpath" type="Label" parent="menu"]
 offset_left = 32.0
-offset_top = 200.0
-offset_right = 224.0
-offset_bottom = 280.0
+offset_top = 216.0
+offset_right = 320.0
+offset_bottom = 265.0
 text = "A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A"
 horizontal_alignment = 1
 vertical_alignment = 2
@@ -52,32 +86,69 @@ autowrap_mode = 2
 
 [node name="quitbtn" type="Button" parent="menu"]
 offset_left = 32.0
-offset_top = 288.0
-offset_right = 224.0
-offset_bottom = 320.0
+offset_top = 273.0
+offset_right = 320.0
+offset_bottom = 305.0
 theme_override_font_sizes/font_size = 12
 text = "Выйти"
 
 [node name="helptext" type="Node2D" parent="."]
 visible = false
-position = Vector2(1280, 360)
+position = Vector2(1280, 0)
 
 [node name="bg" type="ColorRect" parent="helptext"]
-offset_left = -392.0
-offset_top = -240.0
-offset_right = -32.0
-offset_bottom = 240.0
-color = Color(0.258824, 0.301961, 0.423529, 0.560784)
+offset_left = -496.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 232.0
+color = Color(0.258824, 0.301961, 0.423529, 0.301961)
 
 [node name="text" type="Label" parent="helptext"]
-offset_left = -376.0
-offset_top = -224.0
-offset_right = -48.0
-offset_bottom = 224.0
-text = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. In facere exercitationem dolores corporis consectetur reprehenderit odio officiis velit nesciunt? Iusto accusantium sit aspernatur facere doloribus esse rerum quam, officiis aut blanditiis eveniet quas et error eligendi amet. Ab necessitatibus sequi repellat deserunt? Repellat iusto cum veritatis eligendi aliquid facere distinctio quae laborum officiis labore, quasi facilis consequatur dicta? Aliquam ea quod hic similique facere molestias odio pariatur, quibusdam perferendis beatae incidunt, earum corrupti deserunt quam nisi amet maiores sunt repellat veniam officiis autem? Aliquam voluptates magni totam."
-horizontal_alignment = 1
+offset_left = -480.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = 216.0
+text = "ЛКМ - Создать вершину
+ЛКМ (по середине ребра) - Создать вершину на ребре
+ПКМ - Удалить вершину или ребро
+СКМ (с вершины) - Создать ребро
+
+Z (с вершины) - Обозначить как начало пути (красное) 
+X (с вершины) - Обозначить как конец пути (синие)"
 vertical_alignment = 1
 autowrap_mode = 3
 
+[node name="makenew_box" type="Node2D" parent="."]
+position = Vector2(656, 376)
+
+[node name="makenew" type="Label" parent="makenew_box"]
+offset_left = -200.0
+offset_top = -60.0
+offset_right = 200.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(0.27451, 0.254902, 0.286275, 1)
+text = "Создайте новый граф!
+ЛКМ - Создать вершину 
+ПКМ - Удалить вершину или ребро
+СКМ - Создать ребро"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="startenderr_box" type="Node2D" parent="."]
+position = Vector2(672, 720)
+
+[node name="startenderr" type="Label" parent="startenderr_box"]
+offset_left = -352.0
+offset_top = -64.0
+offset_right = 352.0
+theme_override_colors/font_color = Color(1, 0.254902, 0.286275, 1)
+text = "Вы не указали начало или конец графа
+Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [connection signal="pressed" from="menu/helpbtn" to="." method="Helpbtn_Pressed"]
+[connection signal="pressed" from="menu/findpathbtn" to="." method="Findpathbtn_Pressed"]
+[connection signal="pressed" from="menu/removeallbtn" to="." method="RemoveAllbtn_Pressed"]
+[connection signal="toggled" from="menu/showsmallcheck" to="." method="ShowSmallcheck_Toggled"]
 [connection signal="pressed" from="menu/quitbtn" to="." method="Quitbtn_Pressed"]

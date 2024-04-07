@@ -3,8 +3,12 @@
 [ext_resource type="Script" path="res://Assets/Prefabs/Vertex.cs" id="1_bl2nv"]
 [ext_resource type="Texture2D" uid="uid://biyjv5yg2msyq" path="res://Assets/Sprites/Circle.png" id="1_xe55k"]
 
-[node name="Vertex" type="Node2D"]
+[node name="Vertex" type="Node2D" node_paths=PackedStringArray("select", "circle", "mark_node", "shortestsum_node")]
 script = ExtResource("1_bl2nv")
+select = NodePath("Select")
+circle = NodePath("Circle")
+mark_node = NodePath("mark")
+shortestsum_node = NodePath("shortest_sum")
 
 [node name="Select" type="Sprite2D" parent="."]
 self_modulate = Color(0.101961, 0.0941176, 0.105882, 1)
@@ -28,5 +32,14 @@ offset_right = 112.0
 theme_override_colors/font_color = Color(0.101961, 0.0941176, 0.105882, 1)
 theme_override_font_sizes/font_size = 42
 text = "A"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="shortest_sum" type="Label" parent="."]
+offset_left = -48.0
+offset_right = 48.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.101961, 0.0941176, 0.105882, 1)
+theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1

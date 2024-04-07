@@ -1,34 +1,77 @@
-using Godot;
 using System;
+using System.Collections.Generic;
+using Godot;
 
 public partial class Vertex : Node2D
 {
-    private string mark = "\0";
+    public enum Mode
+    {
+        Start = 0,
+        End = 1,
+        Between = 2
+    };
 
+    private string mark = "\0";
     public string Mark
     {
         get => mark;
         set
         {
-            GetNode<Label>("mark").Text = value;
+            mark_node.Text = value;
             mark = value;
         }
     }
 
+    private int shortestsum = int.MaxValue;
+    public int ShortestSum
+    {
+        get => shortestsum;
+        set
+        {
+            if (value != int.MaxValue)
+                shortestsum_node.Text = value.ToString();
+            else
+                shortestsum_node.Text = "";
+            shortestsum = value;
+        }
+    }
+
+    public Settings settings;
+    public Mode mode = Mode.Between;
+    public readonly List<Vertex> path = new();
+
+    [Export] Sprite2D select;
+    [Export] Sprite2D circle;
+    [Export] Label mark_node;
+    [Export] Label shortestsum_node;
+
     public override void _Ready() { }
-	public override void _Process(double delta) { }
 
-	public void Select()
-	{
-		GetNode<Sprite2D>("Select").Visible = true;
-	}
+    public override void _Process(double delta) { }
 
-	public void Deselect() => GetNode<Sprite2D>("Select").Visible = false;
+    public void Select()
+    {
+        select.Visible = true;
+    }
 
+    public void Deselect() => select.Visible = false;
 
-	public void ClearMark()
-	{
-		Mark = "";
-	}
+    public void ClearMark()
+    {
+        Mark = "";
+    }
 
+    public void UpdateColor() {
+        switch (mode) {
+            case Mode.Start:
+                select.SelfModulate = circle.SelfModulate = Color.FromHtml("#ff0000");
+                break;
+            case Mode.End:
+                select.SelfModulate = circle.SelfModulate = Color.FromHtml("#0000ff");
+                break;
+            case Mode.Between:
+                select.SelfModulate = circle.SelfModulate = Color.FromHtml("#1a181b");
+                break;
+        }
+    }
 }
