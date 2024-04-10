@@ -2,15 +2,18 @@
 
 [ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "startenderr_node", "shortpath")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showLengthCheck", "showSmallLengthCheck")]
 script = ExtResource("1_4ixsy")
 vertices = NodePath("Vertices")
 edges = NodePath("Edges")
 menu = NodePath("menu")
 helptext = NodePath("helptext")
 makenew = NodePath("makenew_box")
-startenderr_node = NodePath("startenderr_box")
+errlog_box = NodePath("errlog_box")
+errlog = NodePath("errlog_box/errlog")
 shortpath = NodePath("menu/shortpath")
+showLengthCheck = NodePath("")
+showSmallLengthCheck = NodePath("menu/showsmallcheck")
 
 [node name="Edges" type="Node2D" parent="."]
 
@@ -18,9 +21,9 @@ shortpath = NodePath("menu/shortpath")
 
 [node name="Label" type="Label" parent="."]
 offset_left = 16.0
-offset_top = 336.0
+offset_top = 384.0
 offset_right = 142.0
-offset_bottom = 411.0
+offset_bottom = 459.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "m: 60; 80
 s: 50; 50
@@ -32,7 +35,7 @@ b: 50; 50"
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 336.0
-offset_bottom = 320.0
+offset_bottom = 368.0
 color = Color(0.258824, 0.301961, 0.423529, 0.301961)
 
 [node name="helpbtn" type="Button" parent="menu"]
@@ -49,7 +52,7 @@ offset_top = 80.0
 offset_right = 320.0
 offset_bottom = 112.0
 theme_override_font_sizes/font_size = 12
-text = "Найти кратчайший путь (Пробел)"
+text = "Найти кратчайший путь (c)"
 
 [node name="removeallbtn" type="Button" parent="menu"]
 offset_left = 32.0
@@ -63,22 +66,17 @@ text = "Очистить  граф (r)"
 offset_left = 32.0
 offset_top = 176.0
 offset_right = 320.0
-offset_bottom = 200.0
-
-[node name="Label" type="Label" parent="menu/showsmallcheck"]
-layout_mode = 0
-offset_left = 32.0
-offset_right = 288.0
-offset_bottom = 24.0
+offset_bottom = 201.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 12
 text = "Показывать длину при малых размерах"
-vertical_alignment = 1
 
 [node name="shortpath" type="Label" parent="menu"]
 offset_left = 32.0
-offset_top = 216.0
+offset_top = 256.0
 offset_right = 320.0
-offset_bottom = 265.0
+offset_bottom = 305.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A"
 horizontal_alignment = 1
 vertical_alignment = 2
@@ -86,9 +84,9 @@ autowrap_mode = 2
 
 [node name="quitbtn" type="Button" parent="menu"]
 offset_left = 32.0
-offset_top = 273.0
+offset_top = 320.0
 offset_right = 320.0
-offset_bottom = 305.0
+offset_bottom = 352.0
 theme_override_font_sizes/font_size = 12
 text = "Выйти"
 
@@ -134,14 +132,14 @@ text = "Создайте новый граф!
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="startenderr_box" type="Node2D" parent="."]
+[node name="errlog_box" type="Node2D" parent="."]
 position = Vector2(672, 720)
 
-[node name="startenderr" type="Label" parent="startenderr_box"]
+[node name="errlog" type="Label" parent="errlog_box"]
 offset_left = -352.0
 offset_top = -64.0
 offset_right = 352.0
-theme_override_colors/font_color = Color(1, 0.254902, 0.286275, 1)
+theme_override_colors/font_color = Color(0.729412, 0.541176, 0.196078, 1)
 text = "Вы не указали начало или конец графа
 Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить"
 horizontal_alignment = 1

@@ -21,10 +21,53 @@ public partial class Main : Node2D
     public Node2D makenew;
 
     [Export]
-    public Node2D startenderr_node;
+    public Node2D errlog_box;
+
+    [Export]
+    public Label errlog;
 
     [Export]
     public Label shortpath;
+
+    [Export]
+    public CheckBox showLengthCheck;
+
+    [Export]
+    public CheckBox showSmallLengthCheck;
+
+    public enum ErrorLog
+    {
+        ItsOkay,
+        StartEnd,
+        NoWay,
+    }
+
+    private ErrorLog myerrorlog = ErrorLog.ItsOkay;
+    public ErrorLog MyErrorLog
+    {
+        get => myerrorlog;
+        set
+        {
+            myerrorlog = value;
+            errlog_box.Visible = true; //value != ErrorLog.ItsOkay;
+
+            switch (value)
+            {
+                case ErrorLog.StartEnd:
+                    errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ff4149"));
+                    errlog.Text =
+                        "Вы не указали начало или конец графа\n"
+                        + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
+                    break;
+                case ErrorLog.NoWay:
+                    errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ba8a32"));
+                    errlog.Text =
+                        "Путь из начала до конца не найден\n"
+                        + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
+                    break;
+            }
+        }
+    }
 
     private readonly List<Vertex> verticesList = new();
     private List<Edge> edgesList = new();
@@ -39,7 +82,6 @@ public partial class Main : Node2D
     private bool isHolding = false;
     private Vertex tempMouseVertex = null;
     private bool possiblyConnect = false;
-    private bool startenderr = false;
 
     public bool _remove_extra_edges;
     private Vector2 _prevmousepos;
@@ -50,6 +92,8 @@ public partial class Main : Node2D
 
     public override void _Ready()
     {
+		showLengthCheck.ButtonPressed = true;
+
         shortpath.Text = "";
         _prevmousepos = GetGlobalMousePosition();
 
@@ -108,13 +152,9 @@ public partial class Main : Node2D
             }
 
             if (n == null)
-            {
                 nearest = null;
-            }
             else if (nearest != n)
-            {
                 nearest = n;
-            }
         }
 
         // Clear edges that removed by right click
@@ -188,8 +228,10 @@ public partial class Main : Node2D
             if (Input.IsActionJustPressed("makestart"))
             {
                 if (pathstart != null)
+                {
                     pathstart.mode = Vertex.Mode.Between;
-                pathstart.UpdateColor();
+                    pathstart.UpdateColor();
+                }
 
                 pathstart = nearest;
                 if (pathstart == pathend)
@@ -201,9 +243,10 @@ public partial class Main : Node2D
             if (Input.IsActionJustPressed("makeend"))
             {
                 if (pathend != null)
+                {
                     pathend.mode = Vertex.Mode.Between;
-                pathend.UpdateColor();
-
+                    pathend.UpdateColor();
+                }
                 pathend = nearest;
                 if (pathstart == pathend)
                     pathstart = null;
@@ -294,6 +337,7 @@ public partial class Main : Node2D
         {
             if (possiblyConnect)
             {
+                possiblyConnect = false;
                 RemoveVertex(tempMouseVertex);
                 if (startConnect != null && nearest != null)
                     CreateEdge(startConnect, nearest);
@@ -319,8 +363,8 @@ public partial class Main : Node2D
             makenew.Position = winsize / 2;
 
         helptext.Position = new Vector2(winsize.X, 0);
-        if (startenderr_node.Visible = startenderr)
-            startenderr_node.Position = new Vector2(winsize.X / 2, winsize.Y);
+        if (errlog.Visible = MyErrorLog != ErrorLog.ItsOkay)
+            errlog.Position = new Vector2(winsize.X / 2, winsize.Y);
 
         //==== Debuging ====//
         string t = "";
@@ -377,8 +421,16 @@ public partial class Main : Node2D
     {
         shortpath.Text = "";
 
-        if (startenderr = pathend == null || pathend == null)
+        if (pathend == null || pathend == null)
+        {
+            MyErrorLog = ErrorLog.StartEnd;
+            GD.PushWarning("StartEndErrrrrrrror");
             return;
+        }
+        else
+        {
+            MyErrorLog = ErrorLog.ItsOkay;
+        }
 
         foreach (var vert in verticesList)
         {
@@ -532,8 +584,7 @@ public partial class Main : Node2D
         return null;
     }
 
-    // later (maybe)
-    public void RemoveEdge(Edge edge) { }
+    public void RemoveEdge(Edge edge) { } // later (maybe)
 
     //==== Signals ====//
     public void Helpbtn_Pressed()
@@ -545,7 +596,7 @@ public partial class Main : Node2D
     {
         FindingReset();
 
-        if (startenderr)
+        if (MyErrorLog == ErrorLog.StartEnd)
             return;
 
         pathstart.path.Add(pathstart);
@@ -613,24 +664,33 @@ public partial class Main : Node2D
 
         List<Vertex> path = pathend.path;
 
-        string t = pathstart.Mark;
-        foreach (var item in path.GetRange(1, path.Count - 1))
-            t += " - " + item.Mark;
-
-        shortpath.Text = t;
-
-        for (int i = 0; i < path.Count - 1; i++)
+        if (path.Count > 0)
         {
-            var a = path[i];
-            var b = path[i + 1];
+            string t = pathstart.Mark;
+            foreach (var item in path.GetRange(1, path.Count - 1))
+                t += " - " + item.Mark;
 
-            var f = edgesList.Where(edge => edge.HasVertex(a, b)).ToList();
-            if (f.Count == 1)
-                f[0].Highlight();
-            else if (f.Count == 0)
-                GD.PushWarning("У самурая нет пути, только цель");
-            else
-                GD.PushWarning("У самурая нет цели (есть), только путь (пути)");
+            shortpath.Text = t;
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var a = path[i];
+                var b = path[i + 1];
+
+                var f = edgesList.Where(edge => edge.HasVertex(a, b)).ToList();
+                if (f.Count == 1)
+                    f[0].Highlight();
+                else if (f.Count == 0)
+                    GD.PushWarning("У самурая нет пути, только цель");
+                else
+                    GD.PushWarning("У самурая нет цели (есть), только путь (пути)");
+            }
+            MyErrorLog = ErrorLog.ItsOkay;
+        }
+        else
+        {
+            MyErrorLog = ErrorLog.NoWay;
+            GD.PushWarning("No Way");
         }
     }
 
