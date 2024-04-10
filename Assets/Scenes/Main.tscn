@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showLengthCheck", "showSmallLengthCheck")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showSmallLengthCheck")]
 script = ExtResource("1_4ixsy")
 vertices = NodePath("Vertices")
 edges = NodePath("Edges")
@@ -12,7 +12,6 @@ makenew = NodePath("makenew_box")
 errlog_box = NodePath("errlog_box")
 errlog = NodePath("errlog_box/errlog")
 shortpath = NodePath("menu/shortpath")
-showLengthCheck = NodePath("")
 showSmallLengthCheck = NodePath("menu/showsmallcheck")
 
 [node name="Edges" type="Node2D" parent="."]
@@ -133,6 +132,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="errlog_box" type="Node2D" parent="."]
+visible = false
 position = Vector2(672, 720)
 
 [node name="errlog" type="Label" parent="errlog_box"]

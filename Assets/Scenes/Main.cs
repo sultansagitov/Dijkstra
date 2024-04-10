@@ -30,9 +30,6 @@ public partial class Main : Node2D
     public Label shortpath;
 
     [Export]
-    public CheckBox showLengthCheck;
-
-    [Export]
     public CheckBox showSmallLengthCheck;
 
     public enum ErrorLog
@@ -49,20 +46,20 @@ public partial class Main : Node2D
         set
         {
             myerrorlog = value;
-            errlog_box.Visible = true; //value != ErrorLog.ItsOkay;
+            errlog_box.Visible = value != ErrorLog.ItsOkay;
 
             switch (value)
             {
                 case ErrorLog.StartEnd:
                     errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ff4149"));
                     errlog.Text =
-                        "Вы не указали начало или конец графа\n"
+                        "Вы не указали начало или конец графа, можете выбрать ее используя наводя на вершину и нажав Z или X. \n"
                         + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
                     break;
                 case ErrorLog.NoWay:
                     errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ba8a32"));
                     errlog.Text =
-                        "Путь из начала до конца не найден\n"
+                        "Путь из начала до конца не найден \n"
                         + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
                     break;
             }
@@ -92,8 +89,6 @@ public partial class Main : Node2D
 
     public override void _Ready()
     {
-		showLengthCheck.ButtonPressed = true;
-
         shortpath.Text = "";
         _prevmousepos = GetGlobalMousePosition();
 
@@ -247,6 +242,7 @@ public partial class Main : Node2D
                     pathend.mode = Vertex.Mode.Between;
                     pathend.UpdateColor();
                 }
+
                 pathend = nearest;
                 if (pathstart == pathend)
                     pathstart = null;
@@ -283,8 +279,6 @@ public partial class Main : Node2D
 
             if (isHolding)
             {
-                if (holded == null)
-                    GD.Print("qwerty");
                 holded.Position += mousepos - _prevmousepos;
                 _prevmousepos = mousepos;
             }
@@ -355,6 +349,7 @@ public partial class Main : Node2D
         if (allowEditGraph && Input.IsActionJustPressed("rightmouse") && nearest != null)
         {
             RemoveVertex(nearest);
+            FindingReset();
             UpdateEdges();
         }
 
@@ -363,8 +358,8 @@ public partial class Main : Node2D
             makenew.Position = winsize / 2;
 
         helptext.Position = new Vector2(winsize.X, 0);
-        if (errlog.Visible = MyErrorLog != ErrorLog.ItsOkay)
-            errlog.Position = new Vector2(winsize.X / 2, winsize.Y);
+        if (errlog_box.Visible)
+            errlog_box.Position = new Vector2(winsize.X / 2, winsize.Y);
 
         //==== Debuging ====//
         string t = "";
@@ -392,6 +387,10 @@ public partial class Main : Node2D
         if (isHolding)
             t += "isHolding \n";
 
+        if (pathstart != null)
+            t += $"pathstart {pathstart.Mark} {pathstart} \n";
+        if (pathend != null)
+            t += $"pathend {pathend.Mark} {pathend} \n";
         GetNode<Label>("Label").Text = t;
     }
 
@@ -421,11 +420,9 @@ public partial class Main : Node2D
     {
         shortpath.Text = "";
 
-        if (pathend == null || pathend == null)
+        if (verticesList.Count > 2 && (pathstart == null || pathend == null))
         {
             MyErrorLog = ErrorLog.StartEnd;
-            GD.PushWarning("StartEndErrrrrrrror");
-            return;
         }
         else
         {
@@ -551,7 +548,7 @@ public partial class Main : Node2D
     {
         if (a == b)
         {
-            GD.PushWarning("Алеееее, зачем? это лишнее");
+            GD.PushWarning("это лишнее");
             return null;
         }
 
@@ -597,7 +594,9 @@ public partial class Main : Node2D
         FindingReset();
 
         if (MyErrorLog == ErrorLog.StartEnd)
+        {
             return;
+        }
 
         pathstart.path.Add(pathstart);
         pathstart.ShortestSum = 0;
@@ -662,10 +661,9 @@ public partial class Main : Node2D
             C.Add(vert);
         }
 
-        List<Vertex> path = pathend.path;
-
-        if (path.Count > 0)
+        if (pathend.ShortestSum != int.MaxValue)
         {
+            List<Vertex> path = pathend.path;
             string t = pathstart.Mark;
             foreach (var item in path.GetRange(1, path.Count - 1))
                 t += " - " + item.Mark;
@@ -690,7 +688,6 @@ public partial class Main : Node2D
         else
         {
             MyErrorLog = ErrorLog.NoWay;
-            GD.PushWarning("No Way");
         }
     }
 
