@@ -354,7 +354,7 @@ public partial class Main : Node2D
         }
 
         //==== Help texts ====//
-        if (makenew.Visible = verticesList.Count == 0)
+        if (makenew.Visible = verticesList.Count == 0 && !helptext.Visible)
             makenew.Position = winsize / 2;
 
         helptext.Position = new Vector2(winsize.X, 0);
@@ -391,7 +391,7 @@ public partial class Main : Node2D
             t += $"pathstart {pathstart.Mark} {pathstart} \n";
         if (pathend != null)
             t += $"pathend {pathend.Mark} {pathend} \n";
-        GetNode<Label>("Label").Text = t;
+        // GetNode<Label>("Label").Text = t;
     }
 
     //==== Most used medhods ====//
