@@ -30,7 +30,10 @@ public partial class Edge : Node2D
         {
             size = value;
 
-            if (len_bg.Visible = len.Visible = settings.showSmallEdgeLength || (value > 140))
+            if (
+                len_bg.Visible = len.Visible = 
+                    settings.showSmallEdgeLength || (value > 140)
+            )
                 len.Text = value.ToString();
         }
     }

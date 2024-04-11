@@ -110,20 +110,13 @@ public partial class Main : Node2D
         bool dontCreateExtra = false;
         bool allowEditGraph = true;
 
-        // Dont allow editing when mouse is under menu
-        if (
+        // Don't allow editing when mouse is under menu
+        allowEditGraph = (
             mousepos.X < _menu_start.X
             || mousepos.Y < _menu_start.Y
             || mousepos.X > _menu_end.X
             || mousepos.Y > _menu_end.Y
-        )
-        {
-            allowEditGraph = true;
-        }
-        else
-        {
-            allowEditGraph = false;
-        }
+        );
 
         // Find nearest vertex to mouse
         if (!isHolding)
@@ -172,7 +165,6 @@ public partial class Main : Node2D
             List<Edge> toAddEdges = new();
 
             foreach (var edge in edgesList)
-            {
                 if (edge.createVertexInNextFrame)
                 {
                     edge.createVertexInNextFrame = false;
@@ -184,25 +176,18 @@ public partial class Main : Node2D
                     edge.b = vert;
                     nearest = vert;
                 }
-            }
 
             edgesList.AddRange(toAddEdges);
         }
 
         if (Input.IsActionJustPressed("help"))
-        {
             Helpbtn_Pressed();
-        }
 
         if (Input.IsActionJustPressed("startalgorithm"))
-        {
             Findpathbtn_Pressed();
-        }
 
         if (Input.IsActionJustPressed("removeall"))
-        {
             RemoveAllbtn_Pressed();
-        }
 
         //==== Deselect when mouse too far ====//
         if (
@@ -211,9 +196,7 @@ public partial class Main : Node2D
             && nearest != null
             && (mousepos - nearest.Position).Length() > 23.0
         )
-        {
             nearest = null;
-        }
 
         UpdateSelection();
 
@@ -265,14 +248,9 @@ public partial class Main : Node2D
                     && mousepos.X < _help_end.X
                     && mousepos.Y > _help_end.Y
                 )
-                {
                     helptext.Visible = false;
-                }
 
-                if (!dontCreateExtra && nearest == null)
-                    holded = CreateVertex(mousepos);
-                else
-                    holded = nearest;
+                holded = (!dontCreateExtra && nearest == null) ? CreateVertex(mousepos) : nearest;
 
                 isHolding = true;
             }
@@ -356,45 +334,12 @@ public partial class Main : Node2D
         //==== Help texts ====//
         if (makenew.Visible = verticesList.Count == 0 && !helptext.Visible)
             makenew.Position = winsize / 2;
-
         helptext.Position = new Vector2(winsize.X, 0);
         if (errlog_box.Visible)
             errlog_box.Position = new Vector2(winsize.X / 2, winsize.Y);
-
-        //==== Debuging ====//
-        string t = "";
-        t += $"m: {mousepos} \n";
-        if (nearest != null)
-        {
-            t += $"n: {nearest.Mark} {nearest} {nearest.Position} \n";
-
-            if (nearest.path.Count != 0)
-            {
-                t += $"path \n";
-                foreach (var v in nearest.path)
-                    t += $"{v.Mark} {v} \n";
-            }
-        }
-
-        if (startConnect != null)
-            t += $"s: {startConnect.Mark} {startConnect} {startConnect.Position} \n";
-        if (dontCreateExtra)
-            t += "dontCreateExtra \n";
-        if (allowEditGraph)
-            t += "allowEditGraph \n";
-        if (possiblyConnect)
-            t += "possiblyConnect \n";
-        if (isHolding)
-            t += "isHolding \n";
-
-        if (pathstart != null)
-            t += $"pathstart {pathstart.Mark} {pathstart} \n";
-        if (pathend != null)
-            t += $"pathend {pathend.Mark} {pathend} \n";
-        // GetNode<Label>("Label").Text = t;
     }
 
-    //==== Most used medhods ====//
+    //==== Most used methods ====//
     public static string FindMissingLetter(List<string> marks)
     {
         int expected = 'A';
@@ -402,10 +347,7 @@ public partial class Main : Node2D
 
         while (marks.Contains(mark))
         {
-            if (expected > 'z')
-                mark = (expected - 122).ToString();
-            else
-                mark = ((char)expected).ToString();
+            mark = (expected > 'z') ? (expected - 122).ToString() : ((char)expected).ToString();
 
             if (expected == 'Z')
                 expected += 6;
@@ -419,15 +361,10 @@ public partial class Main : Node2D
     public void FindingReset()
     {
         shortpath.Text = "";
-
-        if (verticesList.Count > 2 && (pathstart == null || pathend == null))
-        {
-            MyErrorLog = ErrorLog.StartEnd;
-        }
-        else
-        {
-            MyErrorLog = ErrorLog.ItsOkay;
-        }
+        MyErrorLog =
+            (verticesList.Count > 2 && (pathstart == null || pathend == null))
+                ? ErrorLog.StartEnd
+                : ErrorLog.ItsOkay;
 
         foreach (var vert in verticesList)
         {
@@ -436,9 +373,7 @@ public partial class Main : Node2D
         }
 
         foreach (var edge in edgesList)
-        {
             edge.HighlightReset();
-        }
     }
 
     public void UpdateSelection()
@@ -463,7 +398,8 @@ public partial class Main : Node2D
 
             edge.Position = (edge.a.Position + edge.b.Position) / 2;
             edge.linecenter.Scale = new Vector2(length / 2, 1);
-            edge.linecenter.RotationDegrees = Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
+            edge.linecenter.RotationDegrees = 
+                Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
             edge.Size = (int)length;
         }
     }
@@ -492,9 +428,7 @@ public partial class Main : Node2D
             vert.mode = Vertex.Mode.End;
         }
         else
-        {
             vert.mode = Vertex.Mode.Between;
-        }
 
         vert.UpdateColor();
 
@@ -548,7 +482,7 @@ public partial class Main : Node2D
     {
         if (a == b)
         {
-            GD.PushWarning("это лишнее");
+            GD.PushWarning("Created unnecessary edge that already created");
             return null;
         }
 
@@ -581,22 +515,19 @@ public partial class Main : Node2D
         return null;
     }
 
-    public void RemoveEdge(Edge edge) { } // later (maybe)
-
     //==== Signals ====//
-    public void Helpbtn_Pressed()
-    {
-        helptext.Visible ^= true;
-    }
+
+    public void Helpbtn_Pressed() => helptext.Visible ^= true;
 
     public void Findpathbtn_Pressed()
     {
         FindingReset();
 
+        if (verticesList.Count < 2)
+            MyErrorLog = ErrorLog.StartEnd;
+
         if (MyErrorLog == ErrorLog.StartEnd)
-        {
             return;
-        }
 
         pathstart.path.Add(pathstart);
         pathstart.ShortestSum = 0;
@@ -679,9 +610,9 @@ public partial class Main : Node2D
                 if (f.Count == 1)
                     f[0].Highlight();
                 else if (f.Count == 0)
-                    GD.PushWarning("У самурая нет пути, только цель");
+                    GD.PushWarning("Edge for shortest path not found");
                 else
-                    GD.PushWarning("У самурая нет цели (есть), только путь (пути)");
+                    GD.PushWarning("Too many vertices for shortest path were found");
             }
             MyErrorLog = ErrorLog.ItsOkay;
         }
@@ -691,15 +622,19 @@ public partial class Main : Node2D
         }
     }
 
-    public void Quitbtn_Pressed()
-    {
-        GetTree().Quit();
-    }
+    public void Quitbtn_Pressed() => GetTree().Quit();
 
     public void ShowSmallcheck_Toggled(bool toggled)
     {
         settings.showSmallEdgeLength = toggled;
         UpdateEdges();
+    }
+
+    public void ShowResultCheck_Toggled(bool toggled)
+    {
+        settings.showResults = toggled;
+        foreach (var vert in verticesList)
+            vert.UpdateBySettings();
     }
 
     public void RemoveAllbtn_Pressed()

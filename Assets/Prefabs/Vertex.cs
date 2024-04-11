@@ -28,10 +28,17 @@ public partial class Vertex : Node2D
         get => shortestsum;
         set
         {
-            if (value != int.MaxValue)
-                shortestsum_node.Text = value.ToString();
+            if (settings.showResults)
+            {
+                if (value != int.MaxValue)
+                    shortestsum_node.Text = value.ToString();
+                else
+                    shortestsum_node.Text = "";
+            }
             else
-                shortestsum_node.Text = "";
+            {
+                shortestsum_node.Visible = false;
+            }
             shortestsum = value;
         }
     }
@@ -40,10 +47,17 @@ public partial class Vertex : Node2D
     public Mode mode = Mode.Between;
     public readonly List<Vertex> path = new();
 
-    [Export] Sprite2D select;
-    [Export] Sprite2D circle;
-    [Export] Label mark_node;
-    [Export] Label shortestsum_node;
+    [Export]
+    Sprite2D select;
+
+    [Export]
+    Sprite2D circle;
+
+    [Export]
+    Label mark_node;
+
+    [Export]
+    Label shortestsum_node;
 
     public override void _Ready() { }
 
@@ -61,8 +75,10 @@ public partial class Vertex : Node2D
         Mark = "";
     }
 
-    public void UpdateColor() {
-        switch (mode) {
+    public void UpdateColor()
+    {
+        switch (mode)
+        {
             case Mode.Start:
                 select.SelfModulate = circle.SelfModulate = Color.FromHtml("#ff0000");
                 break;
@@ -72,6 +88,17 @@ public partial class Vertex : Node2D
             case Mode.Between:
                 select.SelfModulate = circle.SelfModulate = Color.FromHtml("#1a181b");
                 break;
+        }
+    }
+
+    public void UpdateBySettings()
+    {
+        if (shortestsum_node.Visible = settings.showResults)
+        {
+            if (ShortestSum != int.MaxValue)
+                shortestsum_node.Text = ShortestSum.ToString();
+            else
+                shortestsum_node.Text = "";
         }
     }
 }

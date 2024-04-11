@@ -70,6 +70,15 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 12
 text = "Показывать длину при малых размерах"
 
+[node name="showresultcheck" type="CheckBox" parent="menu"]
+offset_left = 32.0
+offset_top = 208.0
+offset_right = 320.0
+offset_bottom = 233.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "Показывать результаты вычислении"
+
 [node name="shortpath" type="Label" parent="menu"]
 offset_left = 32.0
 offset_top = 256.0
@@ -90,6 +99,7 @@ theme_override_font_sizes/font_size = 12
 text = "Выйти"
 
 [node name="helptext" type="Node2D" parent="."]
+visible = false
 position = Vector2(1280, 0)
 
 [node name="bg" type="ColorRect" parent="helptext"]
@@ -140,9 +150,9 @@ visible = false
 position = Vector2(672, 720)
 
 [node name="errlog" type="Label" parent="errlog_box"]
-offset_left = -352.0
+offset_left = -672.0
 offset_top = -64.0
-offset_right = 352.0
+offset_right = 608.0
 theme_override_colors/font_color = Color(0.729412, 0.541176, 0.196078, 1)
 text = "Вы не указали начало или конец графа
 Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить"
@@ -153,4 +163,5 @@ vertical_alignment = 1
 [connection signal="pressed" from="menu/findpathbtn" to="." method="Findpathbtn_Pressed"]
 [connection signal="pressed" from="menu/removeallbtn" to="." method="RemoveAllbtn_Pressed"]
 [connection signal="toggled" from="menu/showsmallcheck" to="." method="ShowSmallcheck_Toggled"]
+[connection signal="toggled" from="menu/showresultcheck" to="." method="ShowResultCheck_Toggled"]
 [connection signal="pressed" from="menu/quitbtn" to="." method="Quitbtn_Pressed"]
