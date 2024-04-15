@@ -52,6 +52,7 @@ public partial class Main : Node2D
         ItsOkay,
         StartEnd,
         NoWay,
+        Filename,
     }
 
     private ErrorLog _myerrorlog = ErrorLog.ItsOkay;
@@ -76,6 +77,11 @@ public partial class Main : Node2D
                     errlog.Text =
                         "Путь из начала до конца не найден \n"
                         + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
+                    break;
+                case ErrorLog.Filename:
+                    errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ff4149"));
+                    errlog.Text =
+                        "В названии файлов не должны присутсвовать символы / \\ : * ? \" < > |";
                     break;
             }
         }
@@ -214,14 +220,26 @@ public partial class Main : Node2D
             edgesList.AddRange(toAddEdges);
         }
 
-        if (Input.IsActionJustPressed("help") && !enter_filename_node.Editable)
+        if (
+            Input.IsActionJustPressed("help") 
+            && !enter_filename_node.Editable
+        )
             Helpbtn_Pressed();
 
         if (Input.IsActionJustPressed("startalgorithm") && !enter_filename_node.Editable)
             Findpathbtn_Pressed();
 
-        if (Input.IsActionJustPressed("removeall") && !enter_filename_node.Editable)
+        if (
+            Input.IsActionJustPressed("removeall") 
+            && !enter_filename_node.Editable
+        )
             RemoveAllbtn_Pressed();
+
+        if (
+            Input.IsActionJustPressed("savefile") 
+            && !enter_filename_node.Editable
+        )
+            Savebtn_Pressed();
 
         //==== Deselect when mouse too far ====//
         if (
@@ -348,7 +366,13 @@ public partial class Main : Node2D
         }
 
         //==== Help texts ====//
-        if (makenew.Visible = verticesList.Count == 0 && !helptext.Visible)
+        makenew.Visible = !(
+            verticesList.Count > 0
+            || helptext.Visible
+            || enter_filename_box.Visible
+            || loadfiles_box.Visible
+        );
+        if (makenew.Visible)
             makenew.Position = winsize / 2;
         helptext.Position = new Vector2(winsize.X, 0);
         if (errlog_box.Visible)
@@ -410,11 +434,13 @@ public partial class Main : Node2D
 
         foreach (var v in verticesList)
         {
-            result += $"\nv,{v.Mark},{v.Position.X},{v.Position.Y},";
+            result +=
+                $"v,{v.Mark},{v.Position.X},{v.Position.Y},";
             if (v == pathstart)
                 result += "a";
             else if (v == pathend)
                 result += "b";
+            result += "\n";
         }
 
         foreach (var e in edgesList)
@@ -907,7 +933,15 @@ public partial class Main : Node2D
 
     public void EnterFilename_Submitted(string new_text)
     {
+        foreach (char ch in "/\\:*?\"<>|")
+            if (new_text.Contains(ch))
+            {
+                MyErrorLog = ErrorLog.Filename;
+                return;
+            }
+
         enter_filename_box.Visible = false;
+        enter_filename_node.Text = "";
         enter_filename_node.Editable = false;
         Filename = $"{new_text}.csv";
         SaveFile(Filename);
