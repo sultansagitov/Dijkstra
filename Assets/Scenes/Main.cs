@@ -27,10 +27,25 @@ public partial class Main : Node2D
     public Label errlog;
 
     [Export]
-    public Label shortpath;
+    public RichTextLabel shortpath;
 
     [Export]
     public CheckBox showSmallLengthCheck;
+
+    [Export]
+    public Label filename_node;
+
+    [Export]
+    public Node2D enter_filename_box;
+
+    [Export]
+    public LineEdit enter_filename_node;
+
+    [Export]
+    public Node2D loadfiles_box;
+
+    [Export]
+    public Control loadfiles_node;
 
     public enum ErrorLog
     {
@@ -39,13 +54,13 @@ public partial class Main : Node2D
         NoWay,
     }
 
-    private ErrorLog myerrorlog = ErrorLog.ItsOkay;
+    private ErrorLog _myerrorlog = ErrorLog.ItsOkay;
     public ErrorLog MyErrorLog
     {
-        get => myerrorlog;
+        get => _myerrorlog;
         set
         {
-            myerrorlog = value;
+            _myerrorlog = value;
             errlog_box.Visible = value != ErrorLog.ItsOkay;
 
             switch (value)
@@ -66,7 +81,18 @@ public partial class Main : Node2D
         }
     }
 
-    private readonly List<Vertex> verticesList = new();
+    private string _filename = "";
+    public string Filename
+    {
+        get => _filename;
+        set
+        {
+            filename_node.Text = value;
+            _filename = value;
+        }
+    }
+
+    private List<Vertex> verticesList = new();
     private List<Edge> edgesList = new();
 
     private readonly Settings settings = new();
@@ -89,6 +115,7 @@ public partial class Main : Node2D
 
     public override void _Ready()
     {
+        Filename = "";
         shortpath.Text = "";
         _prevmousepos = GetGlobalMousePosition();
 
@@ -108,15 +135,15 @@ public partial class Main : Node2D
         _help_end = _help_start + helptext.GetNode<ColorRect>("bg").Size;
 
         bool dontCreateExtra = false;
-        bool allowEditGraph = true;
-
-        // Don't allow editing when mouse is under menu
-        allowEditGraph = (
-            mousepos.X < _menu_start.X
-            || mousepos.Y < _menu_start.Y
-            || mousepos.X > _menu_end.X
-            || mousepos.Y > _menu_end.Y
-        );
+        bool allowEditGraph =
+            (
+                mousepos.X < _menu_start.X
+                || mousepos.Y < _menu_start.Y
+                || mousepos.X > _menu_end.X
+                || mousepos.Y > _menu_end.Y
+            )
+            && !enter_filename_node.Editable
+            && !loadfiles_box.Visible;
 
         // Find nearest vertex to mouse
         if (!isHolding)
@@ -159,7 +186,14 @@ public partial class Main : Node2D
                 })
                 .ToList();
         }
-        // Create vertex on center of edge :  A-----B  -->  A--C--B  : C = new vertex
+
+        // Create vertex on center of edge
+        //
+        // A-----B  --+
+        //            |
+        // A--C--B  <-+
+        //
+        // C = new vertex
         if (allowEditGraph)
         {
             List<Edge> toAddEdges = new();
@@ -180,13 +214,13 @@ public partial class Main : Node2D
             edgesList.AddRange(toAddEdges);
         }
 
-        if (Input.IsActionJustPressed("help"))
+        if (Input.IsActionJustPressed("help") && !enter_filename_node.Editable)
             Helpbtn_Pressed();
 
-        if (Input.IsActionJustPressed("startalgorithm"))
+        if (Input.IsActionJustPressed("startalgorithm") && !enter_filename_node.Editable)
             Findpathbtn_Pressed();
 
-        if (Input.IsActionJustPressed("removeall"))
+        if (Input.IsActionJustPressed("removeall") && !enter_filename_node.Editable)
             RemoveAllbtn_Pressed();
 
         //==== Deselect when mouse too far ====//
@@ -205,32 +239,14 @@ public partial class Main : Node2D
         {
             if (Input.IsActionJustPressed("makestart"))
             {
-                if (pathstart != null)
-                {
-                    pathstart.mode = Vertex.Mode.Between;
-                    pathstart.UpdateColor();
-                }
-
-                pathstart = nearest;
-                if (pathstart == pathend)
-                    pathend = null;
-                pathstart.mode = Vertex.Mode.Start;
-                pathstart.UpdateColor();
+                MakeStart(nearest);
+                FindingReset();
             }
 
             if (Input.IsActionJustPressed("makeend"))
             {
-                if (pathend != null)
-                {
-                    pathend.mode = Vertex.Mode.Between;
-                    pathend.UpdateColor();
-                }
-
-                pathend = nearest;
-                if (pathstart == pathend)
-                    pathstart = null;
-                pathend.mode = Vertex.Mode.End;
-                pathend.UpdateColor();
+                MakeEnd(nearest);
+                FindingReset();
             }
         }
 
@@ -337,6 +353,17 @@ public partial class Main : Node2D
         helptext.Position = new Vector2(winsize.X, 0);
         if (errlog_box.Visible)
             errlog_box.Position = new Vector2(winsize.X / 2, winsize.Y);
+
+        if (enter_filename_box.Visible)
+            enter_filename_box.Position = winsize / 2;
+        else
+            enter_filename_node.Editable = false;
+
+        if (loadfiles_box.Visible)
+            loadfiles_box.Position = winsize / 2;
+
+        GetNode<Label>("Label").Text =
+            $"verticesList {verticesList.Count} \n" + $"edgesList {edgesList.Count}";
     }
 
     //==== Most used methods ====//
@@ -358,6 +385,98 @@ public partial class Main : Node2D
         return mark;
     }
 
+    public void CreateDirIfNotCreated()
+    {
+        using var dir = DirAccess.Open("user://");
+        if (dir != null)
+        {
+            dir.ListDirBegin();
+            string directory = " ";
+            while (directory != "")
+            {
+                directory = dir.GetNext();
+                if (dir.CurrentIsDir() && directory == "savedgraphs")
+                {
+                    dir.MakeDir("savedgraphs");
+                    break;
+                }
+            }
+        }
+    }
+
+    public string MakeSaveData()
+    {
+        string result = "";
+
+        foreach (var v in verticesList)
+        {
+            result += $"\nv,{v.Mark},{v.Position.X},{v.Position.Y},";
+            if (v == pathstart)
+                result += "a";
+            else if (v == pathend)
+                result += "b";
+        }
+
+        foreach (var e in edgesList)
+            result += $"\ne,{e.a.Mark},{e.b.Mark}";
+
+        return result;
+    }
+
+    public void SaveFile(string Filename)
+    {
+        CreateDirIfNotCreated();
+
+        if (Filename != "")
+        {
+            using var file = FileAccess.Open(
+                $"user://savedgraphs/{Filename}",
+                FileAccess.ModeFlags.WriteRead
+            );
+
+            file.StoreString(MakeSaveData());
+        }
+    }
+
+    public void LoadFile(string savename)
+    {
+        string csv;
+
+        RemoveAll();
+
+        {
+            using FileAccess file = FileAccess.Open(
+                $"user://savedgraphs/{savename}",
+                FileAccess.ModeFlags.Read
+            );
+
+            csv = file.GetAsText();
+        }
+
+        foreach (var line in csv.Split("\n"))
+        {
+            if (line == "")
+                continue;
+
+            List<string> values = line.Split(",").ToList();
+
+            if (values[0] == "v")
+            {
+                Vertex v = CreateVertex(new Vector2(int.Parse(values[2]), int.Parse(values[3])));
+                v.Mark = values[1];
+                if (values[4] == "a")
+                    MakeStart(v);
+                else if (values[4] == "b")
+                    MakeEnd(v);
+            }
+            else if (values[0] == "e")
+                CreateEdge(
+                    verticesList.Where(v => v.Mark == values[1]).ToList()[0],
+                    verticesList.Where(v => v.Mark == values[2]).ToList()[0]
+                );
+        }
+    }
+
     public void FindingReset()
     {
         shortpath.Text = "";
@@ -374,6 +493,80 @@ public partial class Main : Node2D
 
         foreach (var edge in edgesList)
             edge.HighlightReset();
+    }
+
+    public void MakeStart(Vertex v)
+    {
+        if (pathstart != null)
+        {
+            pathstart.mode = Vertex.Mode.Between;
+            pathstart.UpdateColor();
+        }
+
+        pathstart = v;
+        if (pathstart == pathend)
+            pathend = null;
+        pathstart.mode = Vertex.Mode.Start;
+        pathstart.UpdateColor();
+    }
+
+    public void MakeEnd(Vertex v)
+    {
+        if (pathend != null)
+        {
+            pathend.mode = Vertex.Mode.Between;
+            pathend.UpdateColor();
+        }
+
+        pathend = v;
+        if (pathstart == pathend)
+            pathstart = null;
+        pathend.mode = Vertex.Mode.End;
+        pathend.UpdateColor();
+    }
+
+    public void UpdateLoadfiles()
+    {
+        List<string> allfiles = new();
+
+        using var dir = DirAccess.Open("user://savedgraphs");
+        if (dir != null)
+        {
+            dir.ListDirBegin();
+            string filename = dir.GetNext();
+
+            while (filename != "")
+            {
+                if (!dir.CurrentIsDir() && filename.EndsWith(".csv"))
+                    allfiles.Add(filename);
+                filename = dir.GetNext();
+            }
+        }
+
+        const float BUTTON_HEIGHT = 32;
+        const float GAP = 8;
+
+        loadfiles_node.CustomMinimumSize = new Vector2(
+            304,
+            allfiles.Count * (BUTTON_HEIGHT + GAP) - GAP
+        );
+
+        foreach (var child in loadfiles_node.GetChildren())
+            loadfiles_node.RemoveChild(child);
+
+        for (int i = 0; i < allfiles.Count; i++)
+        {
+            string savename = allfiles[i];
+
+            Filebtn btn = GD.Load<PackedScene>("res://Assets/Prefabs/Filebtn.tscn")
+                .Instantiate<Filebtn>();
+            btn.main = this;
+            btn.Text = savename;
+            btn.Position = new(0, i * (GAP + BUTTON_HEIGHT));
+            btn.Pressed += () => Loadfilesbtn_Pressed(savename);
+            btn.filename = savename;
+            loadfiles_node.AddChild(btn);
+        }
     }
 
     public void UpdateSelection()
@@ -398,8 +591,8 @@ public partial class Main : Node2D
 
             edge.Position = (edge.a.Position + edge.b.Position) / 2;
             edge.linecenter.Scale = new Vector2(length / 2, 1);
-            edge.linecenter.RotationDegrees = 
-                Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
+            edge.linecenter.RotationDegrees = Mathf.RadToDeg(Mathf.Atan(delta.Y / delta.X));
+            // Объект изменяется внешне в сеттере Size
             edge.Size = (int)length;
         }
     }
@@ -476,6 +669,37 @@ public partial class Main : Node2D
             pathend = null;
     }
 
+    public void RemoveAll()
+    {
+        foreach (var edge in edgesList)
+            edges.RemoveChild(edge);
+        edgesList.Clear();
+
+        List<Vertex> verticesListCopy = new();
+        verticesListCopy.AddRange(verticesList);
+        foreach (var vert in verticesListCopy)
+        {
+            if (vert != null)
+            {
+                vertices.RemoveChild(vert);
+                verticesList.Remove(vert);
+            }
+
+            if (nearest == vert)
+                nearest = null;
+            if (tempMouseVertex == vert)
+                tempMouseVertex = null;
+            if (startConnect == vert)
+                startConnect = null;
+            if (holded == vert)
+                holded = null;
+            if (pathstart == vert)
+                pathstart = null;
+            if (pathend == vert)
+                pathend = null;
+        }
+    }
+
     public Edge CreateEdge(Vertex a, Vertex b) => CreateEdge(a, b, true);
 
     public Edge CreateEdge(Vertex a, Vertex b, bool changeList)
@@ -516,7 +740,6 @@ public partial class Main : Node2D
     }
 
     //==== Signals ====//
-
     public void Helpbtn_Pressed() => helptext.Visible ^= true;
 
     public void Findpathbtn_Pressed()
@@ -637,14 +860,56 @@ public partial class Main : Node2D
             vert.UpdateBySettings();
     }
 
-    public void RemoveAllbtn_Pressed()
-    {
-        foreach (var vert in verticesList)
-            vertices.RemoveChild(vert);
-        verticesList.Clear();
+    public void RemoveAllbtn_Pressed() => RemoveAll();
 
-        foreach (var edge in edgesList)
-            edges.RemoveChild(edge);
-        edgesList.Clear();
+    public void Createbtn_Pressed()
+    {
+        RemoveAllbtn_Pressed();
+        enter_filename_box.Visible = true;
+        enter_filename_node.Editable = true;
+    }
+
+    public void Savebtn_Pressed()
+    {
+        if (Filename == "")
+        {
+            enter_filename_box.Visible = true;
+            enter_filename_node.Editable = true;
+        }
+        else
+            SaveFile(Filename);
+    }
+
+    public void Saveasbtn_Pressed()
+    {
+        enter_filename_box.Visible = true;
+        enter_filename_node.Editable = true;
+    }
+
+    public void Loadfilesbtn_Pressed(string savename)
+    {
+        loadfiles_box.Visible = false;
+
+        Filename = savename;
+        LoadFile(savename);
+    }
+
+    public void Loadbtn_Pressed()
+    {
+        UpdateLoadfiles();
+        loadfiles_box.Visible = true;
+    }
+
+    public void Loadfiles_Exit_Pressed()
+    {
+        loadfiles_box.Visible = false;
+    }
+
+    public void EnterFilename_Submitted(string new_text)
+    {
+        enter_filename_box.Visible = false;
+        enter_filename_node.Editable = false;
+        Filename = $"{new_text}.csv";
+        SaveFile(Filename);
     }
 }

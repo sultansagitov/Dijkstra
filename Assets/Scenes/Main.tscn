@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showSmallLengthCheck")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showSmallLengthCheck", "filename_node", "enter_filename_box", "enter_filename_node", "loadfiles_box", "loadfiles_node")]
 script = ExtResource("1_4ixsy")
 vertices = NodePath("Vertices")
 edges = NodePath("Edges")
@@ -13,20 +13,23 @@ errlog_box = NodePath("errlog_box")
 errlog = NodePath("errlog_box/errlog")
 shortpath = NodePath("menu/shortpath")
 showSmallLengthCheck = NodePath("menu/showsmallcheck")
+filename_node = NodePath("menu/filename")
+enter_filename_box = NodePath("enter_filename_box")
+enter_filename_node = NodePath("enter_filename_box/enter_filename")
+loadfiles_box = NodePath("loadfiles_box")
+loadfiles_node = NodePath("loadfiles_box/ScrollContainer/Control")
 
 [node name="Edges" type="Node2D" parent="."]
 
 [node name="Vertices" type="Node2D" parent="."]
 
 [node name="Label" type="Label" parent="."]
-offset_left = -168.0
-offset_top = 384.0
-offset_right = -42.0
-offset_bottom = 459.0
+offset_left = -80.0
+offset_top = 752.0
+offset_right = -6.0
+offset_bottom = 775.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "m: 60; 80
-s: 50; 50
-b: 50; 50"
+text = "4rt5g56tg"
 
 [node name="menu" type="Node2D" parent="."]
 
@@ -34,7 +37,7 @@ b: 50; 50"
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 336.0
-offset_bottom = 368.0
+offset_bottom = 544.0
 color = Color(0.258824, 0.301961, 0.423529, 0.301961)
 
 [node name="helpbtn" type="Button" parent="menu"]
@@ -47,54 +50,103 @@ text = "Помощь (h)"
 
 [node name="findpathbtn" type="Button" parent="menu"]
 offset_left = 32.0
-offset_top = 80.0
+offset_top = 72.0
 offset_right = 320.0
-offset_bottom = 112.0
+offset_bottom = 104.0
 theme_override_font_sizes/font_size = 12
 text = "Найти кратчайший путь (c)"
 
 [node name="removeallbtn" type="Button" parent="menu"]
 offset_left = 32.0
-offset_top = 128.0
+offset_top = 112.0
 offset_right = 320.0
-offset_bottom = 160.0
+offset_bottom = 144.0
 theme_override_font_sizes/font_size = 12
 text = "Очистить  граф (r)"
 
+[node name="filename" type="Label" parent="menu"]
+offset_left = 32.0
+offset_top = 160.0
+offset_right = 320.0
+offset_bottom = 183.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "the_name_of_file"
+horizontal_alignment = 1
+vertical_alignment = 2
+clip_text = true
+
+[node name="createbtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 192.0
+offset_right = 320.0
+offset_bottom = 224.0
+theme_override_font_sizes/font_size = 12
+text = "Создать
+"
+
+[node name="savebtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 232.0
+offset_right = 320.0
+offset_bottom = 264.0
+theme_override_font_sizes/font_size = 12
+text = "Сохранить"
+
+[node name="saveasbtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 272.0
+offset_right = 320.0
+offset_bottom = 304.0
+theme_override_font_sizes/font_size = 12
+text = "Сохранить как ..."
+
+[node name="loadbtn" type="Button" parent="menu"]
+offset_left = 32.0
+offset_top = 312.0
+offset_right = 320.0
+offset_bottom = 344.0
+theme_override_font_sizes/font_size = 12
+text = "Загрузить"
+
 [node name="showsmallcheck" type="CheckBox" parent="menu"]
 offset_left = 32.0
-offset_top = 176.0
+offset_top = 360.0
 offset_right = 320.0
-offset_bottom = 201.0
+offset_bottom = 385.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 12
 text = "Показывать длину при малых размерах"
 
 [node name="showresultcheck" type="CheckBox" parent="menu"]
 offset_left = 32.0
-offset_top = 208.0
+offset_top = 392.0
 offset_right = 320.0
-offset_bottom = 233.0
+offset_bottom = 417.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 12
 text = "Показывать результаты вычислении"
 
-[node name="shortpath" type="Label" parent="menu"]
+[node name="shortpath_bg" type="ColorRect" parent="menu"]
 offset_left = 32.0
-offset_top = 256.0
+offset_top = 424.0
 offset_right = 320.0
-offset_bottom = 305.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+offset_bottom = 488.0
+color = Color(0, 0, 0, 0.137255)
+
+[node name="shortpath" type="RichTextLabel" parent="menu"]
+offset_left = 40.0
+offset_top = 424.0
+offset_right = 320.0
+offset_bottom = 488.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 text = "A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A - B - A"
-horizontal_alignment = 1
-vertical_alignment = 2
-autowrap_mode = 2
 
 [node name="quitbtn" type="Button" parent="menu"]
 offset_left = 32.0
-offset_top = 320.0
+offset_top = 496.0
 offset_right = 320.0
-offset_bottom = 352.0
+offset_bottom = 528.0
 theme_override_font_sizes/font_size = 12
 text = "Выйти"
 
@@ -107,13 +159,14 @@ offset_left = -496.0
 offset_top = 16.0
 offset_right = -16.0
 offset_bottom = 360.0
-color = Color(0.258824, 0.301961, 0.423529, 0.301961)
+color = Color(0.635294, 0.682353, 0.807843, 0.529412)
 
 [node name="text" type="Label" parent="helptext"]
 offset_left = -480.0
 offset_top = 32.0
 offset_right = -32.0
 offset_bottom = 344.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "----------------- Основные -----------------
 H - Открыть данное окно
 C - найти кратчайший путь
@@ -130,6 +183,7 @@ vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="makenew_box" type="Node2D" parent="."]
+visible = false
 position = Vector2(656, 376)
 
 [node name="makenew" type="Label" parent="makenew_box"]
@@ -145,6 +199,19 @@ text = "Создайте новый граф!
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="enter_filename_box" type="Node2D" parent="."]
+visible = false
+position = Vector2(656, 376)
+
+[node name="enter_filename" type="LineEdit" parent="enter_filename_box"]
+offset_left = -240.0
+offset_top = -24.0
+offset_right = 240.0
+offset_bottom = 24.0
+placeholder_text = "filename"
+alignment = 1
+editable = false
+
 [node name="errlog_box" type="Node2D" parent="."]
 visible = false
 position = Vector2(672, 720)
@@ -159,9 +226,43 @@ text = "Вы не указали начало или конец графа
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="loadfiles_box" type="Node2D" parent="."]
+position = Vector2(656, 376)
+
+[node name="bg" type="ColorRect" parent="loadfiles_box"]
+offset_left = -160.0
+offset_top = -240.0
+offset_right = 160.0
+offset_bottom = 240.0
+color = Color(0.635294, 0.682353, 0.807843, 0.529412)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="loadfiles_box"]
+offset_left = -152.0
+offset_top = -232.0
+offset_right = 176.0
+offset_bottom = 232.0
+
+[node name="Control" type="Control" parent="loadfiles_box/ScrollContainer"]
+custom_minimum_size = Vector2(304, 464)
+layout_mode = 2
+
+[node name="loadfiles_exit" type="Button" parent="loadfiles_box"]
+offset_left = 64.0
+offset_top = 248.0
+offset_right = 160.0
+offset_bottom = 273.0
+theme_override_font_sizes/font_size = 12
+text = "Закрыть"
+
 [connection signal="pressed" from="menu/helpbtn" to="." method="Helpbtn_Pressed"]
 [connection signal="pressed" from="menu/findpathbtn" to="." method="Findpathbtn_Pressed"]
 [connection signal="pressed" from="menu/removeallbtn" to="." method="RemoveAllbtn_Pressed"]
+[connection signal="pressed" from="menu/createbtn" to="." method="Createbtn_Pressed"]
+[connection signal="pressed" from="menu/savebtn" to="." method="Savebtn_Pressed"]
+[connection signal="pressed" from="menu/saveasbtn" to="." method="Saveasbtn_Pressed"]
+[connection signal="pressed" from="menu/loadbtn" to="." method="Loadbtn_Pressed"]
 [connection signal="toggled" from="menu/showsmallcheck" to="." method="ShowSmallcheck_Toggled"]
 [connection signal="toggled" from="menu/showresultcheck" to="." method="ShowResultCheck_Toggled"]
 [connection signal="pressed" from="menu/quitbtn" to="." method="Quitbtn_Pressed"]
+[connection signal="text_submitted" from="enter_filename_box/enter_filename" to="." method="EnterFilename_Submitted"]
+[connection signal="pressed" from="loadfiles_box/loadfiles_exit" to="." method="Loadfiles_Exit_Pressed"]

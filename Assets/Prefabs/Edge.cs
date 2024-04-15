@@ -22,13 +22,13 @@ public partial class Edge : Node2D
 
     public Vertex a;
     public Vertex b;
-    private int size;
+    private int _size;
     public int Size
     {
-        get => size;
+        get => _size;
         set
         {
-            size = value;
+            _size = value;
 
             if (
                 len_bg.Visible = len.Visible = 

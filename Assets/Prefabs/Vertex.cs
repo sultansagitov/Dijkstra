@@ -11,21 +11,21 @@ public partial class Vertex : Node2D
         Between = 2
     };
 
-    private string mark = "\0";
+    private string _mark = "\0";
     public string Mark
     {
-        get => mark;
+        get => _mark;
         set
         {
             mark_node.Text = value;
-            mark = value;
+            _mark = value;
         }
     }
 
-    private int shortestsum = int.MaxValue;
+    private int _shortestsum = int.MaxValue;
     public int ShortestSum
     {
-        get => shortestsum;
+        get => _shortestsum;
         set
         {
             if (settings.showResults)
@@ -39,7 +39,7 @@ public partial class Vertex : Node2D
             {
                 shortestsum_node.Visible = false;
             }
-            shortestsum = value;
+            _shortestsum = value;
         }
     }
 
@@ -69,11 +69,6 @@ public partial class Vertex : Node2D
     }
 
     public void Deselect() => select.Visible = false;
-
-    public void ClearMark()
-    {
-        Mark = "";
-    }
 
     public void UpdateColor()
     {

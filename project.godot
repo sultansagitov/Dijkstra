@@ -12,6 +12,8 @@ config_version=5
 
 config/name="Dijkstra"
 run/main_scene="res://Assets/Scenes/Main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Result/Dijkstra"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 config/icon="res://icon.svg"
