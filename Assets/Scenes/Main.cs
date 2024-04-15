@@ -36,16 +36,10 @@ public partial class Main : Node2D
     public Label filename_node;
 
     [Export]
-    public Node2D enter_filename_box;
+    public FileDialog save_fd;
 
     [Export]
-    public LineEdit enter_filename_node;
-
-    [Export]
-    public Node2D loadfiles_box;
-
-    [Export]
-    public Control loadfiles_node;
+    public FileDialog load_fd;
 
     public enum ErrorLog
     {
@@ -141,15 +135,14 @@ public partial class Main : Node2D
         _help_end = _help_start + helptext.GetNode<ColorRect>("bg").Size;
 
         bool dontCreateExtra = false;
-        bool allowEditGraph =
-            (
-                mousepos.X < _menu_start.X
-                || mousepos.Y < _menu_start.Y
-                || mousepos.X > _menu_end.X
-                || mousepos.Y > _menu_end.Y
-            )
-            && !enter_filename_node.Editable
-            && !loadfiles_box.Visible;
+        bool allowEditGraph = !(
+            mousepos.X >= _menu_start.X
+                && mousepos.Y >= _menu_start.Y
+                && mousepos.X <= _menu_end.X
+                && mousepos.Y <= _menu_end.Y
+            || save_fd.Visible
+            || load_fd.Visible
+        );
 
         // Find nearest vertex to mouse
         if (!isHolding)
@@ -220,25 +213,16 @@ public partial class Main : Node2D
             edgesList.AddRange(toAddEdges);
         }
 
-        if (
-            Input.IsActionJustPressed("help") 
-            && !enter_filename_node.Editable
-        )
+        if (Input.IsActionJustPressed("help"))
             Helpbtn_Pressed();
 
-        if (Input.IsActionJustPressed("startalgorithm") && !enter_filename_node.Editable)
+        if (Input.IsActionJustPressed("startalgorithm"))
             Findpathbtn_Pressed();
 
-        if (
-            Input.IsActionJustPressed("removeall") 
-            && !enter_filename_node.Editable
-        )
+        if (Input.IsActionJustPressed("removeall"))
             RemoveAllbtn_Pressed();
 
-        if (
-            Input.IsActionJustPressed("savefile") 
-            && !enter_filename_node.Editable
-        )
+        if (Input.IsActionJustPressed("savefile"))
             Savebtn_Pressed();
 
         //==== Deselect when mouse too far ====//
@@ -369,22 +353,14 @@ public partial class Main : Node2D
         makenew.Visible = !(
             verticesList.Count > 0
             || helptext.Visible
-            || enter_filename_box.Visible
-            || loadfiles_box.Visible
+            || save_fd.Visible
+            || load_fd.Visible
         );
         if (makenew.Visible)
             makenew.Position = winsize / 2;
         helptext.Position = new Vector2(winsize.X, 0);
         if (errlog_box.Visible)
             errlog_box.Position = new Vector2(winsize.X / 2, winsize.Y);
-
-        if (enter_filename_box.Visible)
-            enter_filename_box.Position = winsize / 2;
-        else
-            enter_filename_node.Editable = false;
-
-        if (loadfiles_box.Visible)
-            loadfiles_box.Position = winsize / 2;
 
         GetNode<Label>("Label").Text =
             $"verticesList {verticesList.Count} \n" + $"edgesList {edgesList.Count}";
@@ -409,7 +385,7 @@ public partial class Main : Node2D
         return mark;
     }
 
-    public void CreateDirIfNotCreated()
+    public static void CreateDirIfNotCreated()
     {
         using var dir = DirAccess.Open("user://");
         if (dir != null)
@@ -434,8 +410,7 @@ public partial class Main : Node2D
 
         foreach (var v in verticesList)
         {
-            result +=
-                $"v,{v.Mark},{v.Position.X},{v.Position.Y},";
+            result += $"v,{v.Mark},{v.Position.X},{v.Position.Y},";
             if (v == pathstart)
                 result += "a";
             else if (v == pathend)
@@ -464,17 +439,14 @@ public partial class Main : Node2D
         }
     }
 
-    public void LoadFile(string savename)
+    public void LoadFile(string savepath)
     {
         string csv;
 
         RemoveAll();
 
         {
-            using FileAccess file = FileAccess.Open(
-                $"user://savedgraphs/{savename}",
-                FileAccess.ModeFlags.Read
-            );
+            using FileAccess file = FileAccess.Open(savepath, FileAccess.ModeFlags.Read);
 
             csv = file.GetAsText();
         }
@@ -549,50 +521,6 @@ public partial class Main : Node2D
             pathstart = null;
         pathend.mode = Vertex.Mode.End;
         pathend.UpdateColor();
-    }
-
-    public void UpdateLoadfiles()
-    {
-        List<string> allfiles = new();
-
-        using var dir = DirAccess.Open("user://savedgraphs");
-        if (dir != null)
-        {
-            dir.ListDirBegin();
-            string filename = dir.GetNext();
-
-            while (filename != "")
-            {
-                if (!dir.CurrentIsDir() && filename.EndsWith(".csv"))
-                    allfiles.Add(filename);
-                filename = dir.GetNext();
-            }
-        }
-
-        const float BUTTON_HEIGHT = 32;
-        const float GAP = 8;
-
-        loadfiles_node.CustomMinimumSize = new Vector2(
-            304,
-            allfiles.Count * (BUTTON_HEIGHT + GAP) - GAP
-        );
-
-        foreach (var child in loadfiles_node.GetChildren())
-            loadfiles_node.RemoveChild(child);
-
-        for (int i = 0; i < allfiles.Count; i++)
-        {
-            string savename = allfiles[i];
-
-            Filebtn btn = GD.Load<PackedScene>("res://Assets/Prefabs/Filebtn.tscn")
-                .Instantiate<Filebtn>();
-            btn.main = this;
-            btn.Text = savename;
-            btn.Position = new(0, i * (GAP + BUTTON_HEIGHT));
-            btn.Pressed += () => Loadfilesbtn_Pressed(savename);
-            btn.filename = savename;
-            loadfiles_node.AddChild(btn);
-        }
     }
 
     public void UpdateSelection()
@@ -890,60 +818,31 @@ public partial class Main : Node2D
 
     public void Createbtn_Pressed()
     {
-        RemoveAllbtn_Pressed();
-        enter_filename_box.Visible = true;
-        enter_filename_node.Editable = true;
+        RemoveAll();
+        Savebtn_Pressed();
     }
 
     public void Savebtn_Pressed()
     {
         if (Filename == "")
-        {
-            enter_filename_box.Visible = true;
-            enter_filename_node.Editable = true;
-        }
+            Saveasbtn_Pressed();
         else
             SaveFile(Filename);
     }
 
     public void Saveasbtn_Pressed()
     {
-        enter_filename_box.Visible = true;
-        enter_filename_node.Editable = true;
-    }
-
-    public void Loadfilesbtn_Pressed(string savename)
-    {
-        loadfiles_box.Visible = false;
-
-        Filename = savename;
-        LoadFile(savename);
+        save_fd.Visible = true;
+        save_fd.CurrentDir = System.Environment.ExpandEnvironmentVariables(
+            @"%APPDATA%/Result/Dijkstra/savedgraphs"
+        );
     }
 
     public void Loadbtn_Pressed()
     {
-        UpdateLoadfiles();
-        loadfiles_box.Visible = true;
-    }
-
-    public void Loadfiles_Exit_Pressed()
-    {
-        loadfiles_box.Visible = false;
-    }
-
-    public void EnterFilename_Submitted(string new_text)
-    {
-        foreach (char ch in "/\\:*?\"<>|")
-            if (new_text.Contains(ch))
-            {
-                MyErrorLog = ErrorLog.Filename;
-                return;
-            }
-
-        enter_filename_box.Visible = false;
-        enter_filename_node.Text = "";
-        enter_filename_node.Editable = false;
-        Filename = $"{new_text}.csv";
-        SaveFile(Filename);
+        load_fd.Visible = true;
+        load_fd.CurrentDir = System.Environment.ExpandEnvironmentVariables(
+            @"%APPDATA%/Result/Dijkstra/savedgraphs"
+        );
     }
 }

@@ -1,14 +1,32 @@
-[gd_scene load_steps=3 format=3 uid="uid://jlx6gp63wno0"]
+[gd_scene load_steps=3 format=3 uid="uid://i5hbre0qw4tc"]
 
-[ext_resource type="Texture2D" uid="uid://ctv1ow6161byy" path="res://trash-icon.svg" id="1_5l3jn"]
-[ext_resource type="Script" path="res://Assets/Prefabs/Filebtn.cs" id="1_on1uv"]
+[sub_resource type="CSharpScript" id="CSharpScript_6l2ys"]
+script/source = "using System;
+using Godot;
+
+public partial class Filebtn : Button
+{
+	[Export] public string filename;
+	public Main main;
+
+    public void Deletebtn_Pressed() {
+		using DirAccess dir = DirAccess.Open(\"user://savedgraphs/\");
+		dir.Remove(\"user://savedgraphs/\" + filename);
+		main.UpdateLoadfiles();
+	}
+}
+"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_8ssta"]
+load_path = "res://.godot/imported/trash-icon.svg-2220325614b48cae82a2553cb976ab26.ctex"
 
 [node name="Filebtn" type="Button"]
 offset_right = 264.0
 offset_bottom = 32.0
 theme_override_font_sizes/font_size = 12
 text = "file_name"
-script = ExtResource("1_on1uv")
+script = SubResource("CSharpScript_6l2ys")
+filename = null
 
 [node name="deletebtn" type="Button" parent="."]
 layout_mode = 0
@@ -16,7 +34,7 @@ offset_left = 272.0
 offset_right = 432.0
 offset_bottom = 160.0
 scale = Vector2(0.2, 0.2)
-icon = ExtResource("1_5l3jn")
+icon = SubResource("CompressedTexture2D_8ssta")
 icon_alignment = 1
 
 [connection signal="pressed" from="." to="." method="OnPressed"]

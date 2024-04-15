@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Assets/Scenes/Main.cs" id="1_4ixsy"]
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showSmallLengthCheck", "filename_node", "enter_filename_box", "enter_filename_node", "loadfiles_box", "loadfiles_node")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("vertices", "edges", "menu", "helptext", "makenew", "errlog_box", "errlog", "shortpath", "showSmallLengthCheck", "filename_node", "save_fd", "load_fd")]
 script = ExtResource("1_4ixsy")
 vertices = NodePath("Vertices")
 edges = NodePath("Edges")
@@ -14,10 +14,8 @@ errlog = NodePath("errlog_box/errlog")
 shortpath = NodePath("menu/shortpath")
 showSmallLengthCheck = NodePath("menu/showsmallcheck")
 filename_node = NodePath("menu/filename")
-enter_filename_box = NodePath("enter_filename_box")
-enter_filename_node = NodePath("enter_filename_box/enter_filename")
-loadfiles_box = NodePath("loadfiles_box")
-loadfiles_node = NodePath("loadfiles_box/ScrollContainer/Control")
+save_fd = NodePath("menu/savebtn/save_filedialog")
+load_fd = NodePath("menu/loadbtn/load_filedialog")
 
 [node name="Edges" type="Node2D" parent="."]
 
@@ -91,7 +89,15 @@ offset_top = 232.0
 offset_right = 320.0
 offset_bottom = 264.0
 theme_override_font_sizes/font_size = 12
-text = "Сохранить"
+text = "Сохранить (Ctrl + S)"
+
+[node name="save_filedialog" type="FileDialog" parent="menu/savebtn"]
+initial_position = 2
+size = Vector2i(700, 500)
+ok_button_text = "Save"
+access = 2
+filters = PackedStringArray("*.csv")
+show_hidden_files = true
 
 [node name="saveasbtn" type="Button" parent="menu"]
 offset_left = 32.0
@@ -108,6 +114,16 @@ offset_right = 320.0
 offset_bottom = 344.0
 theme_override_font_sizes/font_size = 12
 text = "Загрузить"
+
+[node name="load_filedialog" type="FileDialog" parent="menu/loadbtn"]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(700, 500)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.csv")
+show_hidden_files = true
 
 [node name="showsmallcheck" type="CheckBox" parent="menu"]
 offset_left = 32.0
@@ -199,19 +215,6 @@ text = "Создайте новый граф!
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="enter_filename_box" type="Node2D" parent="."]
-visible = false
-position = Vector2(656, 376)
-
-[node name="enter_filename" type="LineEdit" parent="enter_filename_box"]
-offset_left = -240.0
-offset_top = -24.0
-offset_right = 240.0
-offset_bottom = 24.0
-placeholder_text = "filename"
-alignment = 1
-editable = false
-
 [node name="errlog_box" type="Node2D" parent="."]
 visible = false
 position = Vector2(672, 720)
@@ -226,44 +229,15 @@ text = "Вы не указали начало или конец графа
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="loadfiles_box" type="Node2D" parent="."]
-visible = false
-position = Vector2(656, 376)
-
-[node name="bg" type="ColorRect" parent="loadfiles_box"]
-offset_left = -160.0
-offset_top = -240.0
-offset_right = 160.0
-offset_bottom = 240.0
-color = Color(0.635294, 0.682353, 0.807843, 0.529412)
-
-[node name="ScrollContainer" type="ScrollContainer" parent="loadfiles_box"]
-offset_left = -152.0
-offset_top = -232.0
-offset_right = 176.0
-offset_bottom = 232.0
-
-[node name="Control" type="Control" parent="loadfiles_box/ScrollContainer"]
-custom_minimum_size = Vector2(304, 464)
-layout_mode = 2
-
-[node name="loadfiles_exit" type="Button" parent="loadfiles_box"]
-offset_left = 64.0
-offset_top = 248.0
-offset_right = 160.0
-offset_bottom = 273.0
-theme_override_font_sizes/font_size = 12
-text = "Закрыть"
-
 [connection signal="pressed" from="menu/helpbtn" to="." method="Helpbtn_Pressed"]
 [connection signal="pressed" from="menu/findpathbtn" to="." method="Findpathbtn_Pressed"]
 [connection signal="pressed" from="menu/removeallbtn" to="." method="RemoveAllbtn_Pressed"]
 [connection signal="pressed" from="menu/createbtn" to="." method="Createbtn_Pressed"]
 [connection signal="pressed" from="menu/savebtn" to="." method="Savebtn_Pressed"]
+[connection signal="file_selected" from="menu/savebtn/save_filedialog" to="." method="LoadFiledialog_Selected"]
 [connection signal="pressed" from="menu/saveasbtn" to="." method="Saveasbtn_Pressed"]
 [connection signal="pressed" from="menu/loadbtn" to="." method="Loadbtn_Pressed"]
+[connection signal="file_selected" from="menu/loadbtn/load_filedialog" to="." method="LoadFiledialog_Selected"]
 [connection signal="toggled" from="menu/showsmallcheck" to="." method="ShowSmallcheck_Toggled"]
 [connection signal="toggled" from="menu/showresultcheck" to="." method="ShowResultCheck_Toggled"]
 [connection signal="pressed" from="menu/quitbtn" to="." method="Quitbtn_Pressed"]
-[connection signal="text_submitted" from="enter_filename_box/enter_filename" to="." method="EnterFilename_Submitted"]
-[connection signal="pressed" from="loadfiles_box/loadfiles_exit" to="." method="Loadfiles_Exit_Pressed"]
