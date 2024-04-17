@@ -46,7 +46,6 @@ public partial class Main : Node2D
         ItsOkay,
         StartEnd,
         NoWay,
-        Filename,
     }
 
     private ErrorLog _myerrorlog = ErrorLog.ItsOkay;
@@ -63,19 +62,14 @@ public partial class Main : Node2D
                 case ErrorLog.StartEnd:
                     errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ff4149"));
                     errlog.Text =
-                        "Вы не указали начало или конец графа, можете выбрать ее используя наводя на вершину и нажав Z или X. \n"
-                        + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
+                        "Вы не указали начало или конец графа, можете выбрать ее наводя на вершину и нажав Z или X. \n"
+                        + "Нажмите \"Найти кратчайший путь\" или C, чтобы обновить";
                     break;
                 case ErrorLog.NoWay:
                     errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ba8a32"));
                     errlog.Text =
                         "Путь из начала до конца не найден \n"
-                        + "Нажмите \"Найти кратчайший путь\" или Пробел, чтобы обновить";
-                    break;
-                case ErrorLog.Filename:
-                    errlog.Set("theme_override_colors/font_color", Color.FromHtml("#ff4149"));
-                    errlog.Text =
-                        "В названии файлов не должны присутсвовать символы / \\ : * ? \" < > |";
+                        + "Нажмите \"Найти кратчайший путь\" или C, чтобы обновить";
                     break;
             }
         }
@@ -349,21 +343,15 @@ public partial class Main : Node2D
             UpdateEdges();
         }
 
-        //==== Help texts ====//
+        //==== Help/Error texts ====//
         makenew.Visible = !(
-            verticesList.Count > 0
-            || helptext.Visible
-            || save_fd.Visible
-            || load_fd.Visible
+            verticesList.Count > 0 || helptext.Visible || save_fd.Visible || load_fd.Visible
         );
         if (makenew.Visible)
             makenew.Position = winsize / 2;
         helptext.Position = new Vector2(winsize.X, 0);
         if (errlog_box.Visible)
             errlog_box.Position = new Vector2(winsize.X / 2, winsize.Y);
-
-        GetNode<Label>("Label").Text =
-            $"verticesList {verticesList.Count} \n" + $"edgesList {edgesList.Count}";
     }
 
     //==== Most used methods ====//
@@ -838,11 +826,23 @@ public partial class Main : Node2D
         );
     }
 
+    public void SaveFiledialog_Selected(string savepath)
+    {
+        Filename = savepath.Split("/")[^1];
+        SaveFile(Filename);
+    }
+
     public void Loadbtn_Pressed()
     {
         load_fd.Visible = true;
         load_fd.CurrentDir = System.Environment.ExpandEnvironmentVariables(
             @"%APPDATA%/Result/Dijkstra/savedgraphs"
         );
+    }
+
+    public void LoadFiledialog_Selected(string savepath)
+    {
+        Filename = savepath.Split("/")[^1];
+        LoadFile(savepath);
     }
 }

@@ -21,14 +21,6 @@ load_fd = NodePath("menu/loadbtn/load_filedialog")
 
 [node name="Vertices" type="Node2D" parent="."]
 
-[node name="Label" type="Label" parent="."]
-offset_left = -248.0
-offset_top = 504.0
-offset_right = -174.0
-offset_bottom = 527.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "4rt5g56tg"
-
 [node name="menu" type="Node2D" parent="."]
 
 [node name="bg" type="ColorRect" parent="menu"]
@@ -234,7 +226,7 @@ vertical_alignment = 1
 [connection signal="pressed" from="menu/removeallbtn" to="." method="RemoveAllbtn_Pressed"]
 [connection signal="pressed" from="menu/createbtn" to="." method="Createbtn_Pressed"]
 [connection signal="pressed" from="menu/savebtn" to="." method="Savebtn_Pressed"]
-[connection signal="file_selected" from="menu/savebtn/save_filedialog" to="." method="LoadFiledialog_Selected"]
+[connection signal="file_selected" from="menu/savebtn/save_filedialog" to="." method="SaveFiledialog_Selected"]
 [connection signal="pressed" from="menu/saveasbtn" to="." method="Saveasbtn_Pressed"]
 [connection signal="pressed" from="menu/loadbtn" to="." method="Loadbtn_Pressed"]
 [connection signal="file_selected" from="menu/loadbtn/load_filedialog" to="." method="LoadFiledialog_Selected"]
